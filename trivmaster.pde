@@ -11,12 +11,7 @@ void setup() {
   createGUI();
   
   for (int i = 0; i < questionsData.length; i++) {
-    // println(split(questionsData[i], ";"));
     questions.add(new Question(split(questionsData[i], ";")[0], split(questionsData[i], ";")[1]));
-  }
-  // println(questions);
-  for (int i = 0; i < questions.size(); i++) {
-    println(questions.get(i)[0]);
   }
 }
 
@@ -24,7 +19,7 @@ public void settings() {
   size(screen.width, screen.height);
 }
 
-String[] currentQ = {"", ""};
+Question currentQ = questions.get(Math.round(random(0, questions.size())));
 int i = 0;
 int timeout = 0;
 int frame = 0;
