@@ -12,8 +12,8 @@ void setup() {
   createGUI();
   
   for (int i = 0; i < questionsData.length; i++) {
-    println(questionsData[i]);
-    questions.add(split(questionsData[i][1], ";"));
+    println(split(questionsData[i][1], ";"));
+    // questions.add(split(questionsData[i][1], ";"));
   }
   println(questions);
 }
