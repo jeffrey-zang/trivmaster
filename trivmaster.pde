@@ -3,8 +3,7 @@ import g4p_controls.*;
 StatusController statusController = new StatusController();
 Screen screen = new Screen(300, 500, color(255, 255, 255));
 
-
-ArrayList<String[]> questions = new ArrayList<String[]>();
+ArrayList<Question> questions = new ArrayList<Question>();
 
 void setup() {
   String[] questionsData = loadStrings("data/questions.txt");
@@ -12,10 +11,13 @@ void setup() {
   createGUI();
   
   for (int i = 0; i < questionsData.length; i++) {
-    println(split(questionsData[i][1], ";"));
-    // questions.add(split(questionsData[i][1], ";"));
+    // println(split(questionsData[i], ";"));
+    questions.add(new Question(split(questionsData[i], ";")[0], split(questionsData[i], ";")[1]));
   }
-  println(questions);
+  // println(questions);
+  for (int i = 0; i < questions.size(); i++) {
+    println(questions.get(i)[0]);
+  }
 }
 
 public void settings() {
