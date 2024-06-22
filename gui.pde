@@ -39,12 +39,12 @@ public void buzz(GButton source, GEvent event) { //_CODE_:buzzer:681730:
     buzzer.setText("Submit Answer");
     answer.setPromptText("Type your answer here!");
   } else if (statusController.currentStatus == "buzzed") {
-    // println(answer.getText(), qAnswer);
-    // if (answer.getText().equals(qAnswer)) {
-    //   statusController.correct();
-    // } else {
-    //   statusController.wrong();
-    // }
+    println(answer.getText(), currentQ.answer);
+    if (answer.getText().equals(currentQ.answer)) {
+      statusController.correct();
+    } else {
+      statusController.wrong();
+    }
   } else if (statusController.currentStatus == "stats" || statusController.currentStatus == "settings") {
     statusController.currentStatus = "not started";
     buzzer.setText("Start");
@@ -54,12 +54,12 @@ public void buzz(GButton source, GEvent event) { //_CODE_:buzzer:681730:
 public void answer_change(GTextArea source, GEvent event) { //_CODE_:answer:284648:
   println("answer - GTextArea >> GEvent." + event + " @ " + millis());
   if (event == GEvent.ENTERED && statusController.currentStatus == "buzzed") {
-    // println(answer.getText(), qAnswer, answer.getText().equals(qAnswer));
-    // if (answer.getText().equals(qAnswer)) {
-    //   statusController.correct();
-    // } else {
-    //   statusController.wrong();
-    // }
+    println(answer.getText(), currentQ.answer, answer.getText().equals(currentQ.answer));
+    if (answer.getText().equals(currentQ.answer)) {
+      statusController.correct();
+    } else {
+      statusController.wrong();
+    }
   }
 } //_CODE_:answer:284648:
 
