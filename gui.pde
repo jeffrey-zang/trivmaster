@@ -54,8 +54,8 @@ public void buzz(GButton source, GEvent event) { //_CODE_:buzzer:681730:
 public void answer_change(GTextArea source, GEvent event) { //_CODE_:answer:284648:
   println("answer - GTextArea >> GEvent." + event + " @ " + millis());
   if (event == GEvent.ENTERED && statusController.currentStatus == "buzzed") {
-    println(answer.getText(), currentQ.answer, answer.getText().equals(currentQ.answer));
-    if (answer.getText().equals(currentQ.answer)) {
+    println(answer.getText().toLowerCase(), currentQ.answer.toLowerCase(), answer.getText().toLowerCase().equals(currentQ.answer.toLowerCase()));
+    if (answer.getText().toLowerCase().equals(currentQ.answer.toLowerCase())) {
       statusController.correct();
     } else {
       statusController.wrong();
