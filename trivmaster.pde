@@ -49,9 +49,9 @@ void draw() {
     text(currentDisplayed, padding, 50 + padding, 280, 320);
     
     // every 12 frames (0.2 seconds), add a word to the displayed text
-    if (frame % 12 == 0 && i < currentQ.prompt.length) {
-      currentDisplayed += currentQ.prompt[i] + " ";
-      i++;
+    if (frame % 12 == 0 && currentWord < currentQ.prompt.length) {
+      currentDisplayed += currentQ.prompt[currentWord] + " ";
+      currentWord++;
     }
   } else if (statusController.currentStatus == "buzzed") { // if the user buzzed in, begin the timeout
     text((timeout / 60), 280, 280);
