@@ -32,12 +32,9 @@ public void go_settings(GButton source, GEvent event) { //_CODE_:settings:428865
 public void buzz(GButton source, GEvent event) { //_CODE_:buzzer:681730:
   println("button1 - GButton >> GEvent." + event + " @ " + millis());
   if (statusController.currentStatus == "not started") {
-    statusController.currentStatus = "reading";
-    buzzer.setText("Buzz!");
+    statusController.startReading();
   } else if (statusController.currentStatus == "reading") {
-    statusController.currentStatus = "buzzed";
-    buzzer.setText("Submit Answer");
-    answer.setPromptText("Type your answer here!");
+    statusController.stopReading();
   } else if (statusController.currentStatus == "buzzed") {
     println(answer.getText(), currentQ.answer);
     if (answer.getText().equals(currentQ.answer)) {
@@ -46,8 +43,7 @@ public void buzz(GButton source, GEvent event) { //_CODE_:buzzer:681730:
       statusController.wrong();
     }
   } else if (statusController.currentStatus == "stats" || statusController.currentStatus == "settings") {
-    statusController.currentStatus = "not started";
-    buzzer.setText("Start");
+    statusController.reset();
   }
 } //_CODE_:buzzer:681730:
 
@@ -82,7 +78,7 @@ public void createGUI(){
   settings.setText("Settings");
   settings.addEventHandler(this, "go_settings");
   buzzer = new GButton(this, 0, 350, 300, 150);
-  buzzer.setText("Buzz!");
+  buzzer.setText("Start");
   buzzer.addEventHandler(this, "buzz");
   answer = new GTextArea(this, 0, 300, 300, 50, G4P.SCROLLBARS_NONE);
   answer.setPromptText("Type your answer here!");

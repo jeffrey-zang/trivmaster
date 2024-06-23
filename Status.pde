@@ -5,11 +5,18 @@ class StatusController {
     this.currentStatus = "not started";
   }
   
+  void reset() {
+    this.currentStatus = "not started";
+    buzzer.setText("Start");
+  }
   void startReading() {
     this.currentStatus = "reading";
+    buzzer.setText("Buzz!");
   }
   void stopReading() {
     this.currentStatus = "buzzed";
+    buzzer.setText("Submit Answer");
+    answer.setPromptText("Type your answer here!");
     timeout = 0;
   }
   void visitStats() {
