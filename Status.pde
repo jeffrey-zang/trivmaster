@@ -11,6 +11,12 @@ class StatusController {
   }
   void startReading() {
     this.currentStatus = "reading";
+    currentDisplayed = "";
+    i = 0;
+    timeout = 0;
+    frame = 0;
+    currentQ = questions.get(Math.round(random(0, questions.size())));
+    answer.setText("");
     buzzer.setText("Buzz!");
   }
   void stopReading() {

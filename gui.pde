@@ -31,7 +31,7 @@ public void go_settings(GButton source, GEvent event) { //_CODE_:settings:428865
 
 public void buzz(GButton source, GEvent event) { //_CODE_:buzzer:681730:
   println("button1 - GButton >> GEvent." + event + " @ " + millis());
-  if (statusController.currentStatus == "not started") {
+  if (statusController.currentStatus == "not started" || statusController.currentStatus == "timeout" || statusController.currentStatus == "correct" || statusController.currentStatus == "wrong") {
     statusController.startReading();
   } else if (statusController.currentStatus == "reading") {
     statusController.stopReading();
