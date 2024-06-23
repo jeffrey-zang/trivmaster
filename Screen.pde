@@ -1,4 +1,4 @@
-class Screen {
+class Screen { // screen class to handle screen properties
   int width;
   int height;
   color bg;
