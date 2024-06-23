@@ -36,12 +36,7 @@ public void buzz(GButton source, GEvent event) { //_CODE_:buzzer:681730:
   } else if (statusController.currentStatus == "reading") {
     statusController.stopReading();
   } else if (statusController.currentStatus == "buzzed") {
-    println(answer.getText(), currentQ.answer);
-    if (answer.getText().equals(currentQ.answer)) {
-      statusController.correct();
-    } else {
-      statusController.wrong();
-    }
+    currentQ.checkAnswer(answer.getText());
   } else if (statusController.currentStatus == "stats" || statusController.currentStatus == "settings") {
     statusController.reset();
   }
@@ -50,12 +45,7 @@ public void buzz(GButton source, GEvent event) { //_CODE_:buzzer:681730:
 public void answer_change(GTextArea source, GEvent event) { //_CODE_:answer:284648:
   println("answer - GTextArea >> GEvent." + event + " @ " + millis());
   if (event == GEvent.ENTERED && statusController.currentStatus == "buzzed") {
-    println(answer.getText().toLowerCase(), currentQ.answer.toLowerCase(), answer.getText().toLowerCase().equals(currentQ.answer.toLowerCase()));
-    if (answer.getText().toLowerCase().equals(currentQ.answer.toLowerCase())) {
-      statusController.correct();
-    } else {
-      statusController.wrong();
-    }
+    currentQ.checkAnswer(answer.getText());
   }
 } //_CODE_:answer:284648:
 

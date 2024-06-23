@@ -22,10 +22,6 @@ void setup() {
   }
 
   currentQ = questions.get(Math.round(random(0, questions.size())));
-
-  println(join(currentQ.prompt, " "), currentQ.answer);
-
-  questions.get(0).test();
 }
 
 public void settings() {
@@ -62,10 +58,12 @@ void draw() {
     text(currentDisplayed, 20, 70, 280, 320);  
     text("Time's up!", 20, 280);
   } else if (statusController.currentStatus == "correct") {
-    text(currentDisplayed, 20, 70, 280, 320);  
-    text("Correct!", 20, 280);
+    text(currentDisplayed, 20, 70, 280, 320);
+    text("Correct! The correct answer was:", 20, 260);
+    text(currentQ.answer, 20, 280);
   } else if (statusController.currentStatus == "wrong") {
-    text(currentDisplayed, 20, 70, 280, 320);  
+    currentDisplayed = join(currentQ.prompt, " ");
+    text(currentDisplayed, 20, 70, 280, 320);
     text("Wrong! The correct answer was:", 20, 260);
     text(currentQ.answer, 20, 280);
   }
