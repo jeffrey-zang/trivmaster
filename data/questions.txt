@@ -1,50 +1,50 @@
-What is the capital city of Australia?;Canberra
-Who painted the Mona Lisa?;da Vinci
-What is the largest planet in our solar system?;Jupiter
-What is the smallest country in the world?;Vatican
-Who wrote the play "Romeo and Juliet"?;Shakespeare
-Which planet is known as the Red Planet?;Mars
-What is the tallest mountain in the world?;Everest
-Who was the first person to step on the moon?;Armstrong
-What is the main ingredient in guacamole?;Avocado
-Who is known as the father of modern physics?;Einstein
-What is the hardest natural substance on Earth?;Diamond
-Which country gifted the Statue of Liberty to the United States?;France
-Who wrote the novel "1984"?;Orwell
-What is the national flower of Japan?;Cherry blossom
-Which chemical element has the symbol 'Fe'?;Iron
-In which country would you find the ancient city of Petra?;Jordan
-What is the largest mammal in the world?;Blue whale
-Who painted the ceiling of the Sistine Chapel?;Michelangelo
-What is the smallest bone in the human body?;Stapes
-Which country consumes the most chocolate per capita?;Switzerland
-What is the longest river in the world?;Nile
-Who wrote the novel "To Kill a Mockingbird"?;Lee
-What is the chemical symbol for gold?;Au
-Which city hosted the 2016 Summer Olympics?;Rio
-What is the largest desert in the world?;Sahara
-Who invented the telephone?;Bell
-What is the world's largest ocean?;Pacific
-Who was the first female Prime Minister of the United Kingdom?;Thatcher
-What is the most widely spoken language in the world?;Mandarin
-Which animal is known as the "ship of the desert"?;Camel
-Who painted "The Starry Night"?;van Gogh
-What is the largest species of bear?;Polar
-Who wrote the play "Hamlet"?;Shakespeare
-What is the main ingredient in hummus?;Chickpeas
-Which planet is known as the "Morning Star" or "Evening Star"?;Venus
-Who was the first President of the United States?;Washington
-What is the chemical symbol for silver?;Ag
-What is the tallest tree species in the world?;Redwood
-Who wrote the novel "Pride and Prejudice"?;Austen
-What is the largest species of shark?;Whale
-Which country is the largest by land area?;Russia
-Who wrote the opera "The Magic Flute"?;Mozart
-What is the capital city of Canada?;Ottawa
-Which artist painted "The Persistence of Memory"?;Dalí
-What is the rarest blood type among humans?;AB negative
-Who wrote the novel "Moby Dick"?;HermanMelville
-What is the deepest point in the Earth's oceans?;Challenger Deep
-Which element is a primary component of the Earth's atmosphere?;Nitrogen
-Who was the first woman to fly solo across the Atlantic Ocean?;Earhart
-What is the only mammal capable of flight?;Bat
+What is the capital city of Australia?;Canberra;
+Who painted the Mona Lisa?;Leonardo da Vinci;da Vinci
+What is the largest planet in our solar system?;Jupiter;
+What is the smallest country in the world?;Vatican City;Vatican
+Who wrote the play "Romeo and Juliet"?;William Shakespeare;Shakespeare
+Which planet is known as the Red Planet?;Mars;
+What is the tallest mountain in the world?;Mount Everest;Everest
+Who was the first person to step on the moon?;Neil Armstrong;Armstrong
+What is the main ingredient in guacamole?;Avocado;
+Who is known as the father of modern physics?;Albert Einstein;Einstein
+What is the hardest natural substance on Earth?;Diamond;
+Which country gifted the Statue of Liberty to the United States?;France;
+Who wrote the novel "1984"?;George Orwell;Orwell
+What is the national flower of Japan?;Cherry blossom;
+Which chemical element has the symbol 'Fe'?;Iron;
+In which country would you find the ancient city of Petra?;Jordan;
+What is the largest mammal in the world?;Blue whale;
+Who painted the ceiling of the Sistine Chapel?;Michelangelo;
+What is the smallest bone in the human body?;Stapes;
+Which country consumes the most chocolate per capita?;Switzerland;
+What is the longest river in the world?;Nile River;Nile
+Who wrote the novel "To Kill a Mockingbird"?;Harper Lee;Lee
+What is the chemical symbol for gold?;Au;
+Which city hosted the 2016 Summer Olympics?;Rio de Janeiro;Rio
+What is the largest desert in the world?;Sahara Desert;Sahara
+Who invented the telephone?;Alexander Graham Bell;Bell
+What is the world's largest ocean?;Pacific Ocean;
+Who was the first female Prime Minister of the United Kingdom?;Margaret Thatcher;Thatcher
+What is the most widely spoken language in the world?;Mandarin Chinese;Mandarin
+Which animal is known as the "ship of the desert"?;Camel;
+Who painted "The Starry Night"?;Vincent van Gogh;van Gogh
+What is the largest species of bear?;Polar bear;Polar
+Who wrote the play "Hamlet"?;William Shakespeare;Shakespeare
+What is the main ingredient in hummus?;Chickpeas;
+Which planet is known as the "Morning Star" or "Evening Star"?;Venus;
+Who was the first President of the United States?;George Washington;Washington
+What is the chemical symbol for silver?;Ag;
+What is the tallest tree species in the world?;Redwood;
+Who wrote the novel "Pride and Prejudice"?;Jane Austen;Austen
+What is the largest species of shark?;Whale shark;Whale
+Which country is the largest by land area?;Russia;
+Who wrote the opera "The Magic Flute"?;Wolfgang Amadeus Mozart;Mozart
+What is the capital city of Canada?;Ottawa;
+Which artist painted "The Persistence of Memory"?;Salvador Dalí;Dalí
+What is the rarest blood type among humans?;AB negative;
+Who wrote the novel "Moby Dick"?;Herman Melville;Melville
+What is the deepest point in the Earth's oceans?;Challenger Deep;
+Which element is a primary component of the Earth's atmosphere?;Nitrogen;
+Who was the first woman to fly solo across the Atlantic Ocean?;Amelia Earhart;Earhart
+What is the only mammal capable of flight?;Bat;

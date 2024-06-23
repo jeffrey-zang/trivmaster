@@ -18,7 +18,9 @@ void setup() {
   createGUI();
   
   for (int i = 0; i < questionsData.length; i++) {
-    questions.add(new Question(split(questionsData[i], ";")[0], split(questionsData[i], ";")[1]));
+    String[] q = split(questionsData[i], ";");
+
+    questions.add(new Question(q[0], q[1], (q[2] == "" ? q[1] : q[2])));
   }
 
   currentQ = questions.get(Math.round(random(0, questions.size())));
@@ -55,17 +57,20 @@ void draw() {
   } else if (statusController.currentStatus == "settings") {
     text("Settings", 20, 70, 280, 320);
   } else if (statusController.currentStatus == "timeout") {
+    currentDisplayed = join(currentQ.prompt, " ");
     text(currentDisplayed, 20, 70, 280, 320);  
-    text("Time's up!", 20, 280);
+    text("Time's up! The correct answer was:", 20, 260, 280, 280);
+    text(currentQ.answer, 20, 280, 280, 300);
   } else if (statusController.currentStatus == "correct") {
+    currentDisplayed = join(currentQ.prompt, " ");
     text(currentDisplayed, 20, 70, 280, 320);
-    text("Correct! The correct answer was:", 20, 260);
-    text(currentQ.answer, 20, 280);
+    text("Correct! The correct answer was:", 20, 260, 280, 280);
+    text(currentQ.answer, 20, 280, 280, 300);
   } else if (statusController.currentStatus == "wrong") {
     currentDisplayed = join(currentQ.prompt, " ");
     text(currentDisplayed, 20, 70, 280, 320);
-    text("Wrong! The correct answer was:", 20, 260);
-    text(currentQ.answer, 20, 280);
+    text("Wrong! The correct answer was:", 20, 260, 280, 280);
+    text(currentQ.answer, 20, 280, 280, 300);
   }
   
   frame++;
