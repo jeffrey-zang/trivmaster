@@ -1,6 +1,7 @@
 import g4p_controls.*;
 
 StatusController statusController = new StatusController();
+Stats statsController = new Stats();
 Screen screen = new Screen(300, 500, color(255, 255, 255));
 
 ArrayList<Question> questions = new ArrayList<Question>();
@@ -14,9 +15,11 @@ int frame = 0;
 int padding = 20;
 
 void setup() {
-  String[] questionsData = loadStrings("data/questions.txt");
+  statsController.fetch();
   
   createGUI();
+
+  String[] questionsData = loadStrings("data/questions.txt");
   
   for (int i = 0; i < questionsData.length; i++) {
     String[] q = split(questionsData[i], ";");
@@ -25,6 +28,8 @@ void setup() {
   }
   
   currentQ = questions.get(Math.round(random(0, questions.size())));
+
+
 }
 
 public void settings() {
@@ -55,23 +60,26 @@ void draw() {
     text(currentDisplayed, padding, 50 + padding, screen.width - padding, 320);
   } else if (statusController.currentStatus == "stats") {
     text("Stats", padding, 50 + padding, screen.width - padding, 320);
-  } else if (statusController.currentStatus == "settings") {
-    text("Settings", padding, 50 + padding, screen.width - padding, 320);
+    text("Correct: " + statsController.correct, padding, 80 + padding, screen.width - padding, 320);
+    text("Wrong: " + statsController.wrong, padding, 100 + padding, screen.width - padding, 320);
+    text("Percentage: " + statsController.getPercentage() + "%", padding, 120 + padding, screen.width - padding, 320);
+    text("Timeout: " + statsController.timeout, padding, 140 + padding, screen.width - padding, 320);
+    text("Total: " + statsController.getTotal(), padding, 160 + padding, screen.width - padding, 320);
   } else if (statusController.currentStatus == "timeout") {
     currentDisplayed = join(currentQ.prompt, " ");
     text(currentDisplayed, padding, 50 + padding, screen.width - padding, 320);  
-    text("Time's up! The correct answer was:", padding, 240, screen.width - padding, 280);
-    text(currentQ.answer, padding, 280, screen.width - padding, 300);
+    text("Time's up! The answer was:", padding, 240, screen.width - padding, 280);
+    text(currentQ.answer, padding, 260, screen.width - padding, 300);
   } else if (statusController.currentStatus == "correct") {
     currentDisplayed = join(currentQ.prompt, " ");
     text(currentDisplayed, padding, 50 + padding, screen.width - padding, 320);
-    text("Correct! The correct answer was:", padding, 240, screen.width - padding, 280);
-    text(currentQ.answer, padding, 280, screen.width - padding, 300);
+    text("Correct! The answer was:", padding, 240, screen.width - padding, 280);
+    text(currentQ.answer, padding, 260, screen.width - padding, 300);
   } else if (statusController.currentStatus == "wrong") {
     currentDisplayed = join(currentQ.prompt, " ");
     text(currentDisplayed, padding, 50 + padding, screen.width - padding, 320);
-    text("Wrong! The correct answer was:", padding, 240, screen.width - padding, 280);
-    text(currentQ.answer, padding, 280, screen.width - padding, 300);
+    text("Wrong! The answer was:", padding, 240, screen.width - padding, 280);
+    text(currentQ.answer, padding, 260, screen.width - padding, 300);
   }
   
   frame++;

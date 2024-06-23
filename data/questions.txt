@@ -24,7 +24,7 @@ What is the chemical symbol for gold?;Au;
 Which city hosted the 2016 Summer Olympics?;Rio de Janeiro;Rio
 What is the largest desert in the world?;Sahara Desert;Sahara
 Who invented the telephone?;Alexander Graham Bell;Bell
-What is the world's largest ocean?;Pacific Ocean;
+What is the world's largest ocean?;Pacific Ocean;Pacific
 Who was the first female Prime Minister of the United Kingdom?;Margaret Thatcher;Thatcher
 What is the most widely spoken language in the world?;Mandarin Chinese;Mandarin
 Which animal is known as the "ship of the desert"?;Camel;
@@ -44,7 +44,7 @@ What is the capital city of Canada?;Ottawa;
 Which artist painted "The Persistence of Memory"?;Salvador Dalí;Dalí
 What is the rarest blood type among humans?;AB negative;
 Who wrote the novel "Moby Dick"?;Herman Melville;Melville
-What is the deepest point in the Earth's oceans?;Challenger Deep;
+What is the deepest point in the Earth's oceans?;Challenger Deep;Challenger
 Which element is a primary component of the Earth's atmosphere?;Nitrogen;
 Who was the first woman to fly solo across the Atlantic Ocean?;Amelia Earhart;Earhart
 What is the only mammal capable of flight?;Bat;

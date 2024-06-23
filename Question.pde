@@ -7,8 +7,6 @@ class Question {
     this.prompt = q.split(" ");
     this.answer = a;
     this.required = r;
-
-    println(this.required);
   }
 
   int distance(String s1, String s2) { // Damerau-Levenshtein distance, used to calculate the number of operations (replacement, adding, removing) a string needs to become a different string. In other words, it's how similar two strings are (0 - identical, 1,2 - similar, 3+ - different)
