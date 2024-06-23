@@ -11,18 +11,19 @@ String currentDisplayed = "";
 int i = 0;
 int timeout = 0;
 int frame = 0;
+int padding = 20;
 
 void setup() {
   String[] questionsData = loadStrings("data/questions.txt");
-
+  
   createGUI();
   
   for (int i = 0; i < questionsData.length; i++) {
     String[] q = split(questionsData[i], ";");
-
-    questions.add(new Question(q[0], q[1], (q[2] == "" ? q[1] : q[2])));
+    
+    questions.add(new Question(q[0], q[1],(q[2] == "" ? q[1] : q[2])));
   }
-
+  
   currentQ = questions.get(Math.round(random(0, questions.size())));
 }
 
@@ -37,40 +38,40 @@ void draw() {
   textSize(20);
   
   if (statusController.currentStatus == "not started") {
-    text("Press the button below to start practice.", 20, 70, 280, 320);
+    text("Press the button below to start practice.", padding, 50 + padding, screen.width - padding, 300 - padding);
   } else if (statusController.currentStatus == "reading") {
-    text(currentDisplayed, 20, 70, 280, 320);
-  
+    text(currentDisplayed, padding, 50 + padding, 280, 320);
+    
     if (frame % 12 == 0 && i < currentQ.prompt.length) {
       currentDisplayed += currentQ.prompt[i] + " ";
       i++;
     }
   } else if (statusController.currentStatus == "buzzed") {
-    text((timeout/60), 280, 280);
+    text((timeout / 60), 280, 280);
     timeout++;
-    if (timeout/60 == 6) {
+    if (timeout / 60 == 6) {
       statusController.timeout();
     }
-    text(currentDisplayed, 20, 70, 280, 320);
+    text(currentDisplayed, padding, 50 + padding, screen.width - padding, 320);
   } else if (statusController.currentStatus == "stats") {
-    text("Stats", 20, 70, 280, 320);
+    text("Stats", padding, 50 + padding, screen.width - padding, 320);
   } else if (statusController.currentStatus == "settings") {
-    text("Settings", 20, 70, 280, 320);
+    text("Settings", padding, 50 + padding, screen.width - padding, 320);
   } else if (statusController.currentStatus == "timeout") {
     currentDisplayed = join(currentQ.prompt, " ");
-    text(currentDisplayed, 20, 70, 280, 320);  
-    text("Time's up! The correct answer was:", 20, 260, 280, 280);
-    text(currentQ.answer, 20, 280, 280, 300);
+    text(currentDisplayed, padding, 50 + padding, screen.width - padding, 320);  
+    text("Time's up! The correct answer was:", padding, 240, screen.width - padding, 280);
+    text(currentQ.answer, padding, 280, screen.width - padding, 300);
   } else if (statusController.currentStatus == "correct") {
     currentDisplayed = join(currentQ.prompt, " ");
-    text(currentDisplayed, 20, 70, 280, 320);
-    text("Correct! The correct answer was:", 20, 260, 280, 280);
-    text(currentQ.answer, 20, 280, 280, 300);
+    text(currentDisplayed, padding, 50 + padding, screen.width - padding, 320);
+    text("Correct! The correct answer was:", padding, 240, screen.width - padding, 280);
+    text(currentQ.answer, padding, 280, screen.width - padding, 300);
   } else if (statusController.currentStatus == "wrong") {
     currentDisplayed = join(currentQ.prompt, " ");
-    text(currentDisplayed, 20, 70, 280, 320);
-    text("Wrong! The correct answer was:", 20, 260, 280, 280);
-    text(currentQ.answer, 20, 280, 280, 300);
+    text(currentDisplayed, padding, 50 + padding, screen.width - padding, 320);
+    text("Wrong! The correct answer was:", padding, 240, screen.width - padding, 280);
+    text(currentQ.answer, padding, 280, screen.width - padding, 300);
   }
   
   frame++;
