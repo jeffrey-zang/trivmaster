@@ -4,11 +4,13 @@ import { toast } from "sonner";
 import socket from "@/lib/socket";
 import { Message } from "@/backend/src/types";
 import { Room as RoomType } from "@/backend/src/types";
-import { getColorWithOpacity } from "./Team";
+import { getColorWithOpacity } from "@/lib/utils";
+import DOMPurify from "dompurify";
+
 interface ChatProps {
   data: RoomType;
   roomName: string | undefined;
-  chat: string[];
+  chat: Message[];
   onFocusChange?: (isFocused: boolean) => void;
 }
 
@@ -64,6 +66,18 @@ export const Chat = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
     }
   };
 
+  // Function to render message content based on whether it's TSX or plain text
+  const renderMessageContent = (message: Message) => {
+    if (message.tsx) {
+      return (
+        <div
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.text) }}
+        />
+      );
+    }
+    return <>{message.text}</>;
+  };
+
   return (
     <div className="h-1/2 border-t border-gray-100 py-8 dark:border-gray-700">
       <div className="px-8">
@@ -87,7 +101,9 @@ export const Chat = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
           return (
             <div key={`chat-${i}`}>
               {message.author === "admin" && (
-                <div className="text-sm text-gray-500">{message.text}</div>
+                <div className="text-sm text-gray-500">
+                  {renderMessageContent(message)}
+                </div>
               )}
               {message.author !== "admin" && (
                 <div className="text-sm">
@@ -101,7 +117,7 @@ export const Chat = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
                   >
                     {message.author}
                   </span>
-                  {message.text}
+                  {renderMessageContent(message)}
                 </div>
               )}
             </div>

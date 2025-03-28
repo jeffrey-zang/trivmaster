@@ -31,18 +31,20 @@ export const setupRoomHandlers = (
 
       await socket.join(roomName);
 
-      console.log(roomName, "has been created by", userName);
-      console.log(userName, "has joined", roomName);
+      console.log(roomName, "been created by", userName);
+      console.log(userName, "joined", roomName);
 
       rooms[roomName].chat.unshift({
         author: "admin",
-        text: `${roomName} has been created by ${userName}`,
-        timestamp: Date.now()
+        text: `<span><span class="font-bold">${roomName}</span> has been created by ${userName}</span>`,
+        timestamp: Date.now(),
+        tsx: true
       });
       rooms[roomName].chat.unshift({
         author: "admin",
-        text: `${userName} has joined`,
-        timestamp: Date.now()
+        text: `<span>${userName} joined</span>`,
+        timestamp: Date.now(),
+        tsx: true
       });
     } else {
       const existingMembers = Object.values(rooms[roomName].teams).flatMap(
@@ -66,11 +68,12 @@ export const setupRoomHandlers = (
 
       await socket.join(roomName);
 
-      console.log(userName, "has joined", roomName);
+      console.log(userName, "joined", roomName);
       rooms[roomName].chat.unshift({
         author: "admin",
-        text: `${userName} has joined`,
-        timestamp: Date.now()
+        text: `<span>${userName} joined</span>`,
+        timestamp: Date.now(),
+        tsx: true
       });
     }
 
@@ -121,8 +124,9 @@ export const setupRoomHandlers = (
 
     rooms[roomName].chat.unshift({
       author: "admin",
-      text: `${socket.userName} has left`,
-      timestamp: Date.now()
+      text: `<span>${socket.userName} has left</span>`,
+      timestamp: Date.now(),
+      tsx: true
     });
 
     io.to(roomName).emit("room:update", rooms[roomName], {

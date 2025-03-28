@@ -23,6 +23,7 @@ export interface Message {
   team?: string;
   text: string;
   timestamp: number;
+  tsx?: boolean;
 }
 
 export interface Team {

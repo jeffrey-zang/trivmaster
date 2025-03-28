@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import { ISocket, Room, Team, Member } from "../types.ts";
+import { getColorWithOpacity } from "@/frontend/lib/utils";
 
 const colours = [
   "red",
@@ -49,11 +50,13 @@ export const setupTeamHandlers = (
         );
       });
 
+      const teamColour = colours[Math.floor(Math.random() * colours.length)];
+
       rooms[roomName].teams[teamName] = {
         teamName: teamName,
         members: [{ userName: userName, points: 0, buzzed: false }],
         points: 0,
-        colour: colours[Math.floor(Math.random() * colours.length)]
+        colour: teamColour
       };
 
       console.log("Team added:", rooms[roomName].teams);
@@ -62,16 +65,22 @@ export const setupTeamHandlers = (
 
       rooms[roomName].chat.unshift({
         author: "admin",
-        text: `${userName} has added a team: ${teamName}`,
-        timestamp: Date.now()
+        text: `<span>${userName} added a team: <span class="font-semibold" style="background-color: ${getColorWithOpacity(
+          teamColour
+        )}">${teamName}</span></span>`,
+        timestamp: Date.now(),
+        tsx: true
       });
       rooms[roomName].chat.unshift({
         author: "admin",
-        text: `${userName} has joined ${teamName}`,
-        timestamp: Date.now()
+        text: `<span>${userName} joined <span class="font-semibold" style="background-color: ${getColorWithOpacity(
+          teamColour
+        )}">${teamName}</span></span>`,
+        timestamp: Date.now(),
+        tsx: true
       });
-      console.log(userName, "has added a team:", teamName);
-      console.log(userName, "has joined team:", teamName);
+      console.log(userName, "added a team:", teamName);
+      console.log(userName, "joined team:", teamName);
 
       io.to(roomName).emit("room:update", rooms[roomName], {
         userName: userName,
@@ -113,12 +122,15 @@ export const setupTeamHandlers = (
 
       socket.teamName = teamName;
 
+      const teamColour = rooms[roomName].teams[teamName].colour;
+
       rooms[roomName].chat.unshift({
         author: "admin",
-        text: `${userName} has joined ${teamName}`,
-        timestamp: Date.now()
+        text: `<span>${userName} joined <span class="bg-${teamColour}-100 font-semibold">${teamName}</span></span>`,
+        timestamp: Date.now(),
+        tsx: true
       });
-      console.log(userName, "has joined team:", teamName);
+      console.log(userName, "joined team:", teamName);
 
       io.to(roomName).emit("room:update", rooms[roomName], {
         userName: userName,

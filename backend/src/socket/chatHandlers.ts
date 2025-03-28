@@ -23,7 +23,8 @@ export const setupChatHandlers = (
         author: socket.userName,
         team: socket.teamName,
         text: text,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        tsx: false // Regular chat messages don't use TSX by default
       });
 
       io.to(roomName).emit("room:update", rooms[roomName], {
