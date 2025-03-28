@@ -7,11 +7,9 @@ import {
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import socket from "../lib/socket";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Room as RoomType } from "@/backend/types";
 
 const Join = () => {
   const navigate = useNavigate();
@@ -24,12 +22,7 @@ const Join = () => {
       toast.error("Room name is required");
       return;
     }
-
-    socket.emit("join-room", { roomName });
-
-    socket.on("success", (room: RoomType) => {
-      navigate(`/room/${room.roomName}`);
-    });
+    navigate(`/room/${roomName}`);
   };
 
   return (
