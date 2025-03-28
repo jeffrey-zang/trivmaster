@@ -46,8 +46,12 @@ io.on("connection", (socket: ISocket) => {
       await socket.join(roomName);
 
       console.log(roomName, "has been created by", userName);
-      rooms[roomName].chat.push(`${roomName} has been created by ${userName}`);
-      rooms[roomName].chat.push(`${userName} has joined`);
+      console.log(userName, "has joined", roomName);
+
+      rooms[roomName].chat.unshift(
+        `${roomName} has been created by ${userName}`
+      );
+      rooms[roomName].chat.unshift(`${userName} has joined`);
     } else {
       const existingMembers = rooms[roomName].teams.flatMap(
         (team) => team.members
@@ -71,19 +75,23 @@ io.on("connection", (socket: ISocket) => {
       await socket.join(roomName);
 
       console.log(userName, "has joined", roomName);
-      rooms[roomName].chat.push(`${userName} has joined`);
+      rooms[roomName].chat.unshift(`${userName} has joined`);
     }
 
     socket.userName = userName;
     socket.roomName = roomName;
 
-    socket.emit("room-update", rooms[roomName], socket.userName);
+    socket.emit("room:update", rooms[roomName], socket.userName);
 
-    socket.to(roomName).emit("room-update", rooms[roomName]);
+    socket.to(roomName).emit("room:update", rooms[roomName]);
   });
 
   socket.on("room:leave", async ({ roomName }: { roomName: string }) => {
     await socket.leave(roomName);
+
+    if (!(roomName in rooms)) {
+      return;
+    }
 
     const teamIndex = rooms[roomName].teams.findIndex((team) =>
       team.members.some((member) => member.userName === socket.userName)
@@ -108,12 +116,31 @@ io.on("connection", (socket: ISocket) => {
       }
     }
 
-    rooms[roomName].chat.push(`${socket.userName} has left`);
+    rooms[roomName].chat.unshift(`${socket.userName} has left`);
 
-    io.to(roomName).emit("room-update", rooms[roomName]);
+    io.to(roomName).emit("room:update", rooms[roomName]);
 
     socket.offAny();
   });
+
+  socket.on(
+    "chat:send",
+    ({ roomName, message }: { roomName: string; message: string }) => {
+      if (!(roomName in rooms)) {
+        return;
+      }
+
+      if (message.trim() === "") {
+        return;
+      }
+
+      console.log(socket.userName, "sent a message to", roomName);
+
+      rooms[roomName].chat.unshift(`${socket.userName}: ${message}`);
+
+      io.to(roomName).emit("room:update", rooms[roomName]);
+    }
+  );
 });
 
 server.listen(3000, "0.0.0.0", () => {
