@@ -2,8 +2,8 @@ import { Socket } from "socket.io";
 
 export interface ISocket extends Socket {
   userName?: string;
+  teamName?: string;
   roomName?: string;
-  currentTeam?: 1 | 2;
 }
 
 export interface Room {
@@ -25,7 +25,7 @@ export interface Team {
 }
 
 export interface Member {
-  userName?: string;
+  userName: string;
   points: number;
   buzzed: boolean;
 }
@@ -33,5 +33,6 @@ export interface Member {
 export type Question = {
   question: string;
   answer: string;
-  points: number;
+  category?: string;
+  value?: number;
 };

@@ -80,11 +80,17 @@ io.on("connection", (socket: ISocket) => {
     }
 
     socket.userName = userName;
-    socket.roomName = roomName;
+    socket.teamName = "Lobby";
 
-    socket.emit("room:update", rooms[roomName], socket.userName);
+    socket.emit("room:update", rooms[roomName], {
+      userName: userName,
+      teamName: "Lobby"
+    });
 
-    socket.to(roomName).emit("room:update", rooms[roomName]);
+    socket.to(roomName).emit("room:update", rooms[roomName], {
+      userName: userName,
+      teamName: "Lobby"
+    });
   });
 
   socket.on("room:leave", async ({ roomName }: { roomName: string }) => {
@@ -119,7 +125,10 @@ io.on("connection", (socket: ISocket) => {
 
     rooms[roomName].chat.unshift(`${socket.userName} has left`);
 
-    io.to(roomName).emit("room:update", rooms[roomName]);
+    io.to(roomName).emit("room:update", rooms[roomName], {
+      userName: socket.userName,
+      teamName: socket.teamName
+    });
 
     socket.offAny();
   });
@@ -139,7 +148,104 @@ io.on("connection", (socket: ISocket) => {
 
       rooms[roomName].chat.unshift(`${socket.userName}: ${message}`);
 
-      io.to(roomName).emit("room:update", rooms[roomName]);
+      io.to(roomName).emit("room:update", rooms[roomName], {
+        userName: socket.userName,
+        teamName: socket.teamName
+      });
+    }
+  );
+
+  socket.on(
+    "team:add",
+    ({
+      roomName,
+      teamName,
+      userName
+    }: {
+      roomName: string;
+      teamName: string;
+      userName: string;
+    }) => {
+      if (!(roomName in rooms)) {
+        return;
+      }
+
+      rooms[roomName].teams.push({
+        teamName: teamName,
+        members: [{ userName: userName, points: 0, buzzed: false }],
+        points: 0
+      });
+
+      const oldTeamIndex = rooms[roomName].teams.findIndex((team) =>
+        team.members.some((member) => member.userName === userName)
+      );
+      if (oldTeamIndex !== -1) {
+        rooms[roomName].teams[oldTeamIndex].members = rooms[roomName].teams[
+          oldTeamIndex
+        ].members.filter((member) => member.userName !== userName);
+      }
+
+      socket.teamName = teamName;
+
+      rooms[roomName].chat.unshift(`${userName} has added a team: ${teamName}`);
+      rooms[roomName].chat.unshift(`${userName} has joined ${teamName}`);
+      console.log(userName, "has added a team: ", teamName);
+
+      io.to(roomName).emit("room:update", rooms[roomName], {
+        userName: userName,
+        teamName: teamName
+      });
+    }
+  );
+
+  socket.on(
+    "team:join",
+    ({
+      roomName,
+      teamName,
+      userName
+    }: {
+      roomName: string;
+      teamName: string;
+      userName: string;
+    }) => {
+      if (!(roomName in rooms)) {
+        return;
+      }
+
+      const targetTeamIndex = rooms[roomName].teams.findIndex(
+        (team) => team.teamName === teamName
+      );
+
+      if (targetTeamIndex === -1) {
+        return;
+      }
+
+      const oldTeamIndex = rooms[roomName].teams.findIndex((team) =>
+        team.members.some((member) => member.userName === userName)
+      );
+
+      if (oldTeamIndex !== -1) {
+        rooms[roomName].teams[oldTeamIndex].members = rooms[roomName].teams[
+          oldTeamIndex
+        ].members.filter((member) => member.userName !== userName);
+      }
+
+      rooms[roomName].teams[targetTeamIndex].members.push({
+        userName: userName,
+        points: 0,
+        buzzed: false
+      });
+
+      socket.teamName = teamName;
+
+      rooms[roomName].chat.unshift(`${userName} has joined ${teamName}`);
+      console.log(userName, "has joined team:", teamName);
+
+      io.to(roomName).emit("room:update", rooms[roomName], {
+        userName: userName,
+        teamName: teamName
+      });
     }
   );
 });

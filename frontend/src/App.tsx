@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Join from "./pages/Join";
-import Room from "./pages/Room";
+import Room from "./pages/Room/index";
 import { ThemeProvider, useTheme } from "./components/theme/provider";
 import { Toaster } from "sonner";
 import { ModeToggle } from "./components/theme/toggle";

@@ -1,25 +1,24 @@
 import { useParams } from "react-router-dom";
-import socket from "../lib/socket";
+import socket from "@/lib/socket";
 import { useEffect, useState, useRef, KeyboardEvent, useCallback } from "react";
-import type {
-  Room as RoomType,
-  Team,
-  Member
-} from "../../../backend/src/types";
-import { Input } from "../components/ui/input";
+import type { Room as RoomType, ISocket } from "@/backend/src/types";
+import { Input, Button } from "@/components/ui";
 import { toast } from "sonner";
-import { CommandComponent } from "../components/command";
-import { useTheme } from "../components/theme/provider";
-import { Zap } from "lucide-react";
+import { CommandComponent } from "@/components/command";
+import { useTheme } from "@/components/theme/provider";
+import { TeamComponent, Team, Member } from "./Team";
 
 const Room = () => {
   const { roomName } = useParams();
-  const [data, setData] = useState<RoomType | null>(null);
-  const [userName, setUserName] = useState<string | null>(null);
+  const { theme, setTheme } = useTheme();
+
   const inputRef = useRef<HTMLInputElement>(null);
   const blurTargetRef = useRef<HTMLDivElement>(null);
+
+  const [data, setData] = useState<RoomType | null>(null);
+  const [member, setMember] = useState<ISocket | null>(null);
+
   const [isFocused, setIsFocused] = useState(false);
-  const { theme, setTheme } = useTheme();
   const [isZenMode, setIsZenMode] = useState(false);
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [inputMessage, setInputMessage] = useState<string>("");
@@ -37,12 +36,9 @@ const Room = () => {
   }, [roomName]);
 
   useEffect(() => {
-    const onRoomUpdate = (roomData: RoomType, userNameFromServer?: string) => {
+    const onRoomUpdate = (roomData: RoomType, memberFromServer: ISocket) => {
       setData(roomData);
-
-      if (userNameFromServer) {
-        setUserName(userNameFromServer);
-      }
+      setMember(memberFromServer);
 
       console.log("Room updated:", roomData);
     };
@@ -83,13 +79,6 @@ const Room = () => {
         e.preventDefault();
         setIsCommandOpen((open) => !open);
       }
-
-      // if ((e.key === "b" || e.key === "B") && !isFocused && !isCommandOpen) {
-      //   e.preventDefault();
-      //   if (roomName) {
-      //     socket.emit("buzz:in", { roomName });
-      //   }
-      // }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -135,7 +124,7 @@ const Room = () => {
         setIsZenMode={setIsZenMode}
         toggleTheme={toggleTheme}
         roomName={roomName || undefined}
-        userName={userName || undefined}
+        userName={member?.userName || undefined}
         socket={socket}
       />
       <p className="text-sm text-muted-foreground fixed left-16 bottom-6">
@@ -153,46 +142,20 @@ const Room = () => {
         <h1 className="text-xl">
           Room <span className="font-semibold">{roomName}</span>
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Created by <span className="font-semibold">{data?.createdBy}</span>
         </p>
-        <h2 className="font-semibold mt-8">Teams</h2>
-        {data?.teams?.map((team: Team, i: number) => (
-          <div
-            key={`team-${i}`}
-            className="mt-4 border border-gray-200 dark:border-gray-700 p-2 rounded-lg"
-          >
-            <h3 className="font-semibold">{team.teamName}</h3>
-            <div>
-              {team.members.map((member: Member, j: number) => (
-                <div
-                  key={`member-${j}`}
-                  className={`flex items-center justify-between text-sm ${
-                    member.buzzed ? "bg-yellow-400" : ""
-                  } ${
-                    data.currentBuzzed === member.userName
-                      ? "animate-pulse bg-red-500"
-                      : ""
-                  }`}
-                >
-                  <span>
-                    {member.userName}
-                    {member.userName === userName && (
-                      <span className="text-xs inline-flex h-5 select-none items-center gap-1 rounded border bg-muted p-0.5 leading-none ml-1 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                        you
-                      </span>
-                    )}
-                    {(member.buzzed ||
-                      data.currentBuzzed === member.userName) && (
-                      <Zap className="ml-2 h-4 w-4" />
-                    )}
-                  </span>
-                  <span>{member.points}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+
+        {data && (
+          <TeamComponent
+            teams={data.teams || []}
+            roomName={roomName}
+            userName={member?.userName}
+            socket={socket}
+            currentBuzzed={data.currentBuzzed}
+            currentTeam={member?.teamName}
+          />
+        )}
       </div>
 
       <div className="w-3/5">
@@ -237,7 +200,7 @@ const Room = () => {
                 <div
                   key={`member-${j}`}
                   className={`${
-                    member.userName === userName ? "bg-green-500" : ""
+                    member.userName === member?.userName ? "bg-green-500" : ""
                   }`}
                 >
                   {member.userName}
