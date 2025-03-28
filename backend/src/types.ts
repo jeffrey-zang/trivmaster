@@ -11,6 +11,7 @@ export interface Room {
   questions: Question[];
   teams: Team[];
   chat: string[];
+  createdBy: string;
   currentQuestion?: Question;
   currentBuzzed?: string;
   currentAnswered: boolean;

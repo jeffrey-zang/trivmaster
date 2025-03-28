@@ -138,40 +138,56 @@ const Room = () => {
         userName={userName || undefined}
         socket={socket}
       />
-      {/* <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground fixed left-16 bottom-6">
         Press{" "}
         <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-          <span className="text-xs">⌘</span>J
+          <span className="text-xs">⌘</span>K
         </kbd>
-      </p> */}
+      </p>
 
       <div
-        className={`w-1/5 light:bg-gray-100 dark:bg-gray-900 p-8 border-r light:border-gray-300 dark:border-gray-700 transition-opacity duration-150 h-full ${
+        className={`w-1/5 light:bg-gray-200 dark:bg-gray-900 p-8 border-r light:border-gray-300 dark:border-gray-700 transition-opacity duration-150 h-full ${
           isZenMode ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
-        <h1 className="text-2xl font-bold">Room {roomName}</h1>
-        <h2 className="text-xl font-bold">Teams</h2>
+        <h1 className="text-xl">
+          Room <span className="font-semibold">{roomName}</span>
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Created by <span className="font-semibold">{data?.createdBy}</span>
+        </p>
+        <h2 className="font-semibold mt-8">Teams</h2>
         {data?.teams?.map((team: Team, i: number) => (
-          <div key={`team-${i}`}>
-            <h3>{team.teamName}</h3>
+          <div
+            key={`team-${i}`}
+            className="mt-4 border border-gray-200 dark:border-gray-700 p-2 rounded-lg"
+          >
+            <h3 className="font-semibold">{team.teamName}</h3>
             <div>
               {team.members.map((member: Member, j: number) => (
                 <div
                   key={`member-${j}`}
-                  className={`flex items-center p-2 rounded ${
-                    member.userName === userName ? "bg-green-500" : ""
-                  } ${member.buzzed ? "bg-yellow-400" : ""} ${
+                  className={`flex items-center justify-between text-sm ${
+                    member.buzzed ? "bg-yellow-400" : ""
+                  } ${
                     data.currentBuzzed === member.userName
                       ? "animate-pulse bg-red-500"
                       : ""
                   }`}
                 >
-                  {member.userName}
-                  {(member.buzzed ||
-                    data.currentBuzzed === member.userName) && (
-                    <Zap className="ml-2 h-4 w-4" />
-                  )}
+                  <span>
+                    {member.userName}
+                    {member.userName === userName && (
+                      <span className="text-xs inline-flex h-5 select-none items-center gap-1 rounded border bg-muted p-0.5 leading-none ml-1 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                        you
+                      </span>
+                    )}
+                    {(member.buzzed ||
+                      data.currentBuzzed === member.userName) && (
+                      <Zap className="ml-2 h-4 w-4" />
+                    )}
+                  </span>
+                  <span>{member.points}</span>
                 </div>
               ))}
             </div>
@@ -179,28 +195,32 @@ const Room = () => {
         ))}
       </div>
 
-      <div className="w-3/5 p-8">
-        <div>Question {data?.questions ? data.questions.length : 0}</div>
-        <Input
-          type="text"
-          placeholder={`${
-            isFocused ? "Press esc to unfocus" : "Press enter to type"
-          }`}
-          ref={inputRef}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          onKeyDown={handleInputKeyDown}
-          value={inputMessage}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setInputMessage(e.target.value)
-          }
-        />
-        <div>
-          {data?.chat.map((message: string, i: number) => (
-            <div key={`chat-${i}`}>{message}</div>
-          ))}
+      <div className="w-3/5">
+        <div className="h-1/2 p-8">
+          <div>Question {data?.questions ? data.questions.length : 0}</div>
         </div>
-        <div ref={blurTargetRef} tabIndex={-1} style={{ outline: "none" }} />
+        <div className="h-1/2 border-t border-gray-100 dark:border-gray-700 p-8">
+          <h2>Chat</h2>
+          <Input
+            type="text"
+            placeholder={`${
+              isFocused ? "Press esc to unfocus" : "Press enter to type"
+            }`}
+            ref={inputRef}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            onKeyDown={handleInputKeyDown}
+            value={inputMessage}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setInputMessage(e.target.value)
+            }
+          />
+          <div>
+            {data?.chat.map((message: string, i: number) => (
+              <div key={`chat-${i}`}>{message}</div>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div
@@ -227,6 +247,8 @@ const Room = () => {
           </div>
         ))}
       </div>
+
+      <div ref={blurTargetRef} tabIndex={-1} style={{ outline: "none" }} />
     </div>
   );
 };

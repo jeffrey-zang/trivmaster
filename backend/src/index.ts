@@ -40,7 +40,8 @@ io.on("connection", (socket: ISocket) => {
         currentQuestion: undefined,
         currentBuzzed: undefined,
         currentAnswered: false,
-        chat: []
+        chat: [],
+        createdBy: userName
       };
 
       await socket.join(roomName);
