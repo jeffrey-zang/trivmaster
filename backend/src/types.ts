@@ -29,6 +29,7 @@ export interface Team {
   teamName: string;
   members: Member[];
   points: number;
+  colour: string;
 }
 
 export interface Member {
