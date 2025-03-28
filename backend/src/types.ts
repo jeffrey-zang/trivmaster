@@ -10,6 +10,7 @@ export interface Room {
   roomName: string;
   questions: Question[];
   teams: Team[];
+  chat: string[];
   currentQuestion?: Question;
   currentBuzzed?: string;
   currentAnswered: boolean;
