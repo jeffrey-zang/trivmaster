@@ -1,9 +1,16 @@
 import { useParams } from "react-router-dom";
 import socket from "../lib/socket";
 import { useEffect, useState, useRef, KeyboardEvent, useCallback } from "react";
-import type { Room as RoomType, Team, Member } from "@/backend/types";
-import { Input } from "@/components/ui/input";
+import type {
+  Room as RoomType,
+  Team,
+  Member
+} from "../../../backend/src/types";
+import { Input } from "../components/ui/input";
 import { toast } from "sonner";
+import { CommandComponent } from "../components/command";
+import { useTheme } from "../components/theme/provider";
+import { Zap } from "lucide-react";
 
 const Room = () => {
   const { roomName } = useParams();
@@ -12,8 +19,9 @@ const Room = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const blurTargetRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
+  const { theme, setTheme } = useTheme();
   const [isZenMode, setIsZenMode] = useState(false);
-
+  const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [inputMessage, setInputMessage] = useState<string>("");
 
   useEffect(() => {
@@ -66,11 +74,22 @@ const Room = () => {
         inputRef.current?.focus();
       }
 
-      if (e.key === "z" || e.key === "Z") {
+      if ((e.key === "z" || e.key === "Z") && !isFocused && !isCommandOpen) {
         e.preventDefault();
-        console.log("Zen mode");
         setIsZenMode((prev) => !prev);
       }
+
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setIsCommandOpen((open) => !open);
+      }
+
+      // if ((e.key === "b" || e.key === "B") && !isFocused && !isCommandOpen) {
+      //   e.preventDefault();
+      //   if (roomName) {
+      //     socket.emit("buzz:in", { roomName });
+      //   }
+      // }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -80,7 +99,7 @@ const Room = () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("keydown", handleKeyDown as any);
     };
-  }, [roomName, isFocused, setIsZenMode]);
+  }, [roomName, isFocused, setIsZenMode, isCommandOpen]);
 
   const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -104,10 +123,30 @@ const Room = () => {
     }
   };
 
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
   return (
     <div className="flex h-screen">
+      <CommandComponent
+        isCommandOpen={isCommandOpen}
+        setIsCommandOpen={setIsCommandOpen}
+        setIsZenMode={setIsZenMode}
+        toggleTheme={toggleTheme}
+        roomName={roomName || undefined}
+        userName={userName || undefined}
+        socket={socket}
+      />
+      {/* <p className="text-sm text-muted-foreground">
+        Press{" "}
+        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+          <span className="text-xs">⌘</span>J
+        </kbd>
+      </p> */}
+
       <div
-        className={`w-1/5 bg-gray-100 p-8 border-r border-gray-300 transition-opacity duration-150 h-full ${
+        className={`w-1/5 light:bg-gray-100 dark:bg-gray-900 p-8 border-r light:border-gray-300 dark:border-gray-700 transition-opacity duration-150 h-full ${
           isZenMode ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
@@ -120,11 +159,19 @@ const Room = () => {
               {team.members.map((member: Member, j: number) => (
                 <div
                   key={`member-${j}`}
-                  className={`${
+                  className={`flex items-center p-2 rounded ${
                     member.userName === userName ? "bg-green-500" : ""
+                  } ${member.buzzed ? "bg-yellow-400" : ""} ${
+                    data.currentBuzzed === member.userName
+                      ? "animate-pulse bg-red-500"
+                      : ""
                   }`}
                 >
                   {member.userName}
+                  {(member.buzzed ||
+                    data.currentBuzzed === member.userName) && (
+                    <Zap className="ml-2 h-4 w-4" />
+                  )}
                 </div>
               ))}
             </div>
@@ -157,7 +204,7 @@ const Room = () => {
       </div>
 
       <div
-        className={`w-1/5 p-8 border-l border-gray-300 h-full bg-gray-100 transition-opacity duration-150 ${
+        className={`w-1/5 p-8 border-l light:border-gray-300 dark:border-gray-700 h-full light:bg-gray-100 dark:bg-gray-900 transition-opacity duration-150 ${
           isZenMode ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
