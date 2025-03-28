@@ -1,13 +1,13 @@
 import { Socket } from "socket.io";
 
 export interface ISocket extends Socket {
-  username?: string;
-  roomName: string;
+  userName?: string;
+  roomName?: string;
   currentTeam?: 1 | 2;
 }
 
 export interface Room {
-  name: string;
+  roomName: string;
   questions: Question[];
   teams: Team[];
   currentQuestion?: Question;
@@ -17,13 +17,13 @@ export interface Room {
 }
 
 export interface Team {
-  name: string;
+  teamName: string;
   members: Member[];
   points: number;
 }
 
 export interface Member {
-  username?: string;
+  userName?: string;
   points: number;
   buzzed: boolean;
 }
