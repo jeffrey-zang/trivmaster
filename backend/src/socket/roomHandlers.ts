@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { ISocket, Room } from "../types.ts";
+import { ISocket, Room, Team, Member } from "../types.ts";
 
 export const setupRoomHandlers = (
   io: Server,
@@ -14,14 +14,14 @@ export const setupRoomHandlers = (
       rooms[roomName] = {
         roomName: roomName,
         questions: [],
-        teams: [
-          {
+        teams: {
+          Lobby: {
             teamName: "Lobby",
             members: [{ userName: userName, points: 0, buzzed: false }],
             points: 0,
             colour: "#808080"
           }
-        ],
+        },
         currentQuestion: undefined,
         currentBuzzed: undefined,
         currentAnswered: false,
@@ -45,11 +45,11 @@ export const setupRoomHandlers = (
         timestamp: Date.now()
       });
     } else {
-      const existingMembers = rooms[roomName].teams.flatMap(
-        (team) => team.members
+      const existingMembers = Object.values(rooms[roomName].teams).flatMap(
+        (team: Team) => team.members
       );
       const existingMemberNames = existingMembers.map(
-        (member) => member.userName
+        (member: Member) => member.userName
       );
 
       let i = 1;
@@ -58,7 +58,7 @@ export const setupRoomHandlers = (
         i++;
       }
 
-      rooms[roomName].teams[0].members.push({
+      rooms[roomName].teams["Lobby"].members.push({
         userName: userName,
         points: 0,
         buzzed: false
@@ -95,27 +95,28 @@ export const setupRoomHandlers = (
       return;
     }
 
-    const teamIndex = rooms[roomName].teams.findIndex((team) =>
-      team.members.some((member) => member.userName === socket.userName)
-    );
-    if (teamIndex !== -1) {
-      rooms[roomName].teams[teamIndex].members = rooms[roomName].teams[
-        teamIndex
-      ].members.filter((member) => member.userName !== socket.userName);
+    if (!socket.teamName || !socket.userName) {
+      return;
+    }
 
-      if (rooms[roomName].teams[teamIndex].members.length === 0) {
-        rooms[roomName].teams.splice(teamIndex, 1);
+    const userTeamName = socket.teamName;
+
+    if (userTeamName in rooms[roomName].teams) {
+      rooms[roomName].teams[userTeamName].members = rooms[roomName].teams[
+        userTeamName
+      ].members.filter((member: Member) => member.userName !== socket.userName);
+
+      if (rooms[roomName].teams[userTeamName].members.length === 0) {
+        delete rooms[roomName].teams[userTeamName];
       }
     }
 
     console.log(socket.userName, "has left", roomName);
 
-    if (rooms[roomName].teams) {
-      if (rooms[roomName].teams.every((team) => team.members.length === 0)) {
-        delete rooms[roomName];
-        console.log(roomName, "has been deleted");
-        return;
-      }
+    if (Object.keys(rooms[roomName].teams).length === 0) {
+      delete rooms[roomName];
+      console.log(roomName, "has been deleted");
+      return;
     }
 
     rooms[roomName].chat.unshift({

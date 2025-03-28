@@ -9,7 +9,7 @@ export interface ISocket extends Socket {
 export interface Room {
   roomName: string;
   questions: Question[];
-  teams: Team[];
+  teams: Record<string, Team>;
   chat: Message[];
   createdBy: string;
   currentQuestion?: Question;

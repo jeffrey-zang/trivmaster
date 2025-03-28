@@ -1,5 +1,27 @@
 import { Server } from "socket.io";
-import { ISocket, Room } from "../types.ts";
+import { ISocket, Room, Team, Member } from "../types.ts";
+
+const colours = [
+  "red",
+  "orange",
+  "amber",
+  "yellow",
+  "lime",
+  "green",
+  "emerald",
+  "teal",
+  "cyan",
+  "sky",
+  "blue",
+  "indigo",
+  "violet",
+  "purple",
+  "fuchsia",
+  "pink",
+  "rose",
+  "gray",
+  "slate"
+];
 
 export const setupTeamHandlers = (
   io: Server,
@@ -21,21 +43,20 @@ export const setupTeamHandlers = (
         return;
       }
 
-      rooms[roomName].teams.push({
+      Object.values(rooms[roomName].teams).forEach((team: Team) => {
+        team.members = team.members.filter(
+          (member: Member) => member.userName !== userName
+        );
+      });
+
+      rooms[roomName].teams[teamName] = {
         teamName: teamName,
         members: [{ userName: userName, points: 0, buzzed: false }],
         points: 0,
-        colour: "#" + Math.floor(Math.random() * 16777215).toString(16)
-      });
+        colour: colours[Math.floor(Math.random() * colours.length)]
+      };
 
-      const oldTeamIndex = rooms[roomName].teams.findIndex((team) =>
-        team.members.some((member) => member.userName === userName)
-      );
-      if (oldTeamIndex !== -1) {
-        rooms[roomName].teams[oldTeamIndex].members = rooms[roomName].teams[
-          oldTeamIndex
-        ].members.filter((member) => member.userName !== userName);
-      }
+      console.log("Team added:", rooms[roomName].teams);
 
       socket.teamName = teamName;
 
@@ -49,7 +70,9 @@ export const setupTeamHandlers = (
         text: `${userName} has joined ${teamName}`,
         timestamp: Date.now()
       });
-      console.log(userName, "has added a team: ", teamName);
+      console.log(userName, "has added a team:", teamName);
+      console.log(userName, "has joined team:", teamName);
+
       io.to(roomName).emit("room:update", rooms[roomName], {
         userName: userName,
         teamName: teamName
@@ -72,25 +95,17 @@ export const setupTeamHandlers = (
         return;
       }
 
-      const targetTeamIndex = rooms[roomName].teams.findIndex(
-        (team) => team.teamName === teamName
-      );
-
-      if (targetTeamIndex === -1) {
+      if (!(teamName in rooms[roomName].teams)) {
         return;
       }
 
-      const oldTeamIndex = rooms[roomName].teams.findIndex((team) =>
-        team.members.some((member) => member.userName === userName)
-      );
+      Object.values(rooms[roomName].teams).forEach((team: Team) => {
+        team.members = team.members.filter(
+          (member: Member) => member.userName !== userName
+        );
+      });
 
-      if (oldTeamIndex !== -1) {
-        rooms[roomName].teams[oldTeamIndex].members = rooms[roomName].teams[
-          oldTeamIndex
-        ].members.filter((member) => member.userName !== userName);
-      }
-
-      rooms[roomName].teams[targetTeamIndex].members.push({
+      rooms[roomName].teams[teamName].members.push({
         userName: userName,
         points: 0,
         buzzed: false
