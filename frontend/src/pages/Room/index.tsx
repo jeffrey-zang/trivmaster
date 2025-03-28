@@ -127,7 +127,10 @@ const Room = () => {
         userName={member?.userName || undefined}
         socket={socket}
       />
-      <p className="text-sm text-muted-foreground fixed left-16 bottom-6">
+      <p
+        className="text-sm text-muted-foreground fixed left-16 bottom-6"
+        onClick={() => setIsCommandOpen(true)}
+      >
         Press{" "}
         <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
           <span className="text-xs">⌘</span>K

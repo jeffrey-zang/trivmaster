@@ -13,19 +13,8 @@ import {
   Label,
   Input
 } from "@/components/ui";
-
+import { Team, Member } from "@/backend/types";
 type DialogType = "addTeam" | "joinTeam" | null;
-
-export interface Member {
-  userName: string;
-  points: number;
-  buzzed: boolean;
-}
-
-export interface Team {
-  teamName: string;
-  members: Member[];
-}
 
 interface TeamProps {
   teams: Team[];
@@ -52,6 +41,9 @@ export const TeamComponent = ({
     if (teamName === "") {
       toast.error("Team name cannot be empty");
       return;
+    } else if (teams.some((team) => team.teamName === teamName)) {
+      toast.error("Team name already exists");
+      return;
     }
     socket.emit("team:add", {
       roomName,
@@ -68,6 +60,7 @@ export const TeamComponent = ({
       teamName: selectedTeam,
       userName
     });
+    toast.success(`You have joined ${selectedTeam}`);
     setSelectedTeam("");
     setActiveDialog(null);
   };
@@ -165,7 +158,10 @@ export const TeamComponent = ({
             setSelectedTeam(team.teamName);
           }}
         >
-          <h3 className="font-semibold text-sm mb-1">{team.teamName}</h3>
+          <h3 className="font-semibold text-sm mb-1 flex items-center justify-between">
+            <span>{team.teamName}</span>
+            {team.teamName !== "Lobby" && <span>{team.points}</span>}
+          </h3>
           <div className="flex flex-col gap-0.5">
             {team.members.length === 0 && (
               <div className="text-xs text-muted-foreground">No one</div>
