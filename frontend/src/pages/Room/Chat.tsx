@@ -3,14 +3,16 @@ import { Input } from "@/components/ui";
 import { toast } from "sonner";
 import socket from "@/lib/socket";
 import { Message } from "@/backend/src/types";
-
+import { Room as RoomType } from "@/backend/src/types";
+import { getColorWithOpacity } from "./Team";
 interface ChatProps {
+  data: RoomType;
   roomName: string | undefined;
   chat: string[];
   onFocusChange?: (isFocused: boolean) => void;
 }
 
-export const Chat = ({ roomName, chat, onFocusChange }: ChatProps) => {
+export const Chat = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [inputMessage, setInputMessage] = useState<string>("");
@@ -63,22 +65,24 @@ export const Chat = ({ roomName, chat, onFocusChange }: ChatProps) => {
   };
 
   return (
-    <div className="h-1/2 border-t border-gray-100 dark:border-gray-700 p-8">
-      <Input
-        type="text"
-        placeholder={`${
-          isFocused ? "Press esc to unfocus" : "Press enter to type"
-        }`}
-        ref={inputRef}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        onKeyDown={handleInputKeyDown}
-        value={inputMessage}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setInputMessage(e.target.value)
-        }
-      />
-      <div>
+    <div className="h-1/2 border-t border-gray-100 py-8 dark:border-gray-700">
+      <div className="px-8">
+        <Input
+          type="text"
+          placeholder={`${
+            isFocused ? "Press esc to unfocus" : "Press enter to type"
+          }`}
+          ref={inputRef}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          onKeyDown={handleInputKeyDown}
+          value={inputMessage}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setInputMessage(e.target.value)
+          }
+        />
+      </div>
+      <div className="overflow-y-scroll h-full px-8 pb-8 pt-4">
         {chat?.map((message: Message, i: number) => {
           return (
             <div key={`chat-${i}`}>
@@ -87,7 +91,16 @@ export const Chat = ({ roomName, chat, onFocusChange }: ChatProps) => {
               )}
               {message.author !== "admin" && (
                 <div className="text-sm">
-                  <span className="font-bold mr-2">{message.author}</span>
+                  <span
+                    className={`font-bold mr-2`}
+                    style={{
+                      backgroundColor: getColorWithOpacity(
+                        data?.teams[message.team]?.colour
+                      )
+                    }}
+                  >
+                    {message.author}
+                  </span>
                   {message.text}
                 </div>
               )}

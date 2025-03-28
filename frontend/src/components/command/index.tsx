@@ -84,10 +84,10 @@ export const CommandComponent = ({
           {commands.map((command, index) => {
             if (typeof command === "string") {
               return (
-                <>
+                <div key={`command-heading-${index}`}>
                   {index !== 0 && <CommandSeparator />}
-                  <CommandGroup heading={command} key={`command-${index}`} />
-                </>
+                  <CommandGroup heading={command} />
+                </div>
               );
             }
 

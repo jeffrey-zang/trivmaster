@@ -1,10 +1,15 @@
 import { useParams } from "react-router-dom";
 import socket from "@/lib/socket";
 import { useEffect, useState, useRef, KeyboardEvent } from "react";
-import type { Room as RoomType, ISocket } from "@/backend/src/types";
+import type {
+  Room as RoomType,
+  ISocket,
+  Team,
+  Member
+} from "@/backend/src/types";
 import { CommandComponent } from "@/components/command";
 import { useTheme } from "@/components/theme/provider";
-import { TeamComponent, Team, Member } from "./Team";
+import { TeamComponent } from "./Team";
 import { Chat } from "./Chat";
 
 const Room = () => {
@@ -34,10 +39,9 @@ const Room = () => {
 
   useEffect(() => {
     const onRoomUpdate = (roomData: RoomType, memberFromServer: ISocket) => {
+      console.log("Room updated:", roomData);
       setData(roomData);
       setMember(memberFromServer);
-
-      console.log("Room updated:", roomData);
     };
 
     socket.on("room:update", onRoomUpdate);
@@ -118,7 +122,7 @@ const Room = () => {
 
         {data && (
           <TeamComponent
-            teams={data.teams || []}
+            teams={data.teams || {}}
             roomName={roomName}
             userName={member?.userName}
             socket={socket}
@@ -133,6 +137,7 @@ const Room = () => {
           <div>Question {data?.questions ? data.questions.length : 0}</div>
         </div>
         <Chat
+          data={data}
           roomName={roomName}
           chat={data?.chat || []}
           onFocusChange={setIsChatFocused}
@@ -145,23 +150,24 @@ const Room = () => {
         }`}
       >
         <h2 className="text-xl font-bold">Config</h2>
-        {data?.teams?.map((team: Team, i: number) => (
-          <div key={`team-${i}`}>
-            <h3>{team.teamName}</h3>
-            <div>
-              {team.members.map((member: Member, j: number) => (
-                <div
-                  key={`member-${j}`}
-                  className={`${
-                    member.userName === member?.userName ? "bg-green-500" : ""
-                  }`}
-                >
-                  {member.userName}
-                </div>
-              ))}
+        {data?.teams &&
+          Object.entries(data.teams).map(([teamName, team]: [string, Team]) => (
+            <div key={`team-${teamName}`}>
+              <h3>{team.teamName}</h3>
+              <div>
+                {team.members.map((member: Member, j: number) => (
+                  <div
+                    key={`member-${j}`}
+                    className={`${
+                      member.userName === member?.userName ? "bg-green-500" : ""
+                    }`}
+                  >
+                    {member.userName}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
 
       <div ref={blurTargetRef} tabIndex={-1} style={{ outline: "none" }} />

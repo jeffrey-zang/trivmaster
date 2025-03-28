@@ -1,4 +1,4 @@
-import { useState, KeyboardEvent } from "react";
+import { useState, KeyboardEvent, useEffect } from "react";
 import { Socket } from "socket.io-client";
 import { toast } from "sonner";
 import { Zap } from "lucide-react";
@@ -13,17 +13,44 @@ import {
   Label,
   Input
 } from "@/components/ui";
-import { Team, Member } from "@/backend/types";
+import { Team, Member } from "@/backend/src/types";
 type DialogType = "addTeam" | "joinTeam" | null;
 
 interface TeamProps {
-  teams: Team[];
+  teams: Record<string, Team>;
   roomName: string | undefined;
   userName: string | undefined;
   socket: Socket;
   currentBuzzed: string | null;
   currentTeam: string | undefined;
 }
+
+// Function to convert color names to RGBA values
+export const getColorWithOpacity = (colorName: string): string => {
+  const colorMap: Record<string, string> = {
+    red: "255, 0, 0",
+    blue: "0, 0, 255",
+    green: "0, 128, 0",
+    yellow: "255, 255, 0",
+    purple: "128, 0, 128",
+    orange: "255, 165, 0",
+    pink: "255, 192, 203",
+    teal: "0, 128, 128",
+    cyan: "0, 255, 255",
+    indigo: "75, 0, 130",
+    lime: "0, 255, 0",
+    amber: "255, 191, 0",
+    emerald: "80, 200, 120",
+    sky: "135, 206, 235",
+    violet: "238, 130, 238",
+    fuchsia: "255, 0, 255",
+    rose: "255, 0, 127"
+  };
+
+  const rgbValue = colorMap[colorName.toLowerCase()] || "0, 0, 0";
+
+  return `rgba(${rgbValue}, 0.15)`;
+};
 
 export const TeamComponent = ({
   teams,
@@ -41,7 +68,7 @@ export const TeamComponent = ({
     if (teamName === "") {
       toast.error("Team name cannot be empty");
       return;
-    } else if (teams.some((team) => team.teamName === teamName)) {
+    } else if (teamName in teams) {
       toast.error("Team name already exists");
       return;
     }
@@ -146,10 +173,13 @@ export const TeamComponent = ({
   return (
     <>
       <h2 className="font-semibold mt-8">Teams</h2>
-      {teams?.map((team: Team, i: number) => (
+      {Object.entries(teams).map(([teamName, team]: [string, Team]) => (
         <div
-          key={`team-${i}`}
-          className="mt-2 border border-gray-200 dark:border-gray-700 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150"
+          key={`team-${teamName}`}
+          className={`mt-2 border border-gray-200 dark:border-gray-700 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150`}
+          style={{
+            backgroundColor: getColorWithOpacity(team.colour)
+          }}
           onClick={() => {
             if (team.teamName === currentTeam) {
               return;
