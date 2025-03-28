@@ -10,12 +10,19 @@ export interface Room {
   roomName: string;
   questions: Question[];
   teams: Team[];
-  chat: string[];
+  chat: Message[];
   createdBy: string;
   currentQuestion?: Question;
   currentBuzzed?: string;
   currentAnswered: boolean;
   // config: RoomConfig;
+}
+
+export interface Message {
+  author?: string;
+  team?: string;
+  text: string;
+  timestamp: number;
 }
 
 export interface Team {

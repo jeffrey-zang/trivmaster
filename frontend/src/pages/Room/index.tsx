@@ -1,27 +1,24 @@
 import { useParams } from "react-router-dom";
 import socket from "@/lib/socket";
-import { useEffect, useState, useRef, KeyboardEvent, useCallback } from "react";
+import { useEffect, useState, useRef, KeyboardEvent } from "react";
 import type { Room as RoomType, ISocket } from "@/backend/src/types";
-import { Input, Button } from "@/components/ui";
-import { toast } from "sonner";
 import { CommandComponent } from "@/components/command";
 import { useTheme } from "@/components/theme/provider";
 import { TeamComponent, Team, Member } from "./Team";
+import { Chat } from "./Chat";
 
 const Room = () => {
   const { roomName } = useParams();
   const { theme, setTheme } = useTheme();
 
-  const inputRef = useRef<HTMLInputElement>(null);
   const blurTargetRef = useRef<HTMLDivElement>(null);
 
   const [data, setData] = useState<RoomType | null>(null);
   const [member, setMember] = useState<ISocket | null>(null);
 
-  const [isFocused, setIsFocused] = useState(false);
   const [isZenMode, setIsZenMode] = useState(false);
   const [isCommandOpen, setIsCommandOpen] = useState(false);
-  const [inputMessage, setInputMessage] = useState<string>("");
+  const [isChatFocused, setIsChatFocused] = useState(false);
 
   useEffect(() => {
     if (!roomName) return;
@@ -50,13 +47,6 @@ const Room = () => {
     };
   }, []);
 
-  const unfocusInput = useCallback(() => {
-    if (inputRef.current) {
-      inputRef.current.blur();
-    }
-    setIsFocused(false);
-  }, []);
-
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (roomName) {
@@ -65,12 +55,11 @@ const Room = () => {
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && !isFocused) {
-        e.preventDefault();
-        inputRef.current?.focus();
-      }
-
-      if ((e.key === "z" || e.key === "Z") && !isFocused && !isCommandOpen) {
+      if (
+        (e.key === "z" || e.key === "Z") &&
+        !isChatFocused &&
+        !isCommandOpen
+      ) {
         e.preventDefault();
         setIsZenMode((prev) => !prev);
       }
@@ -88,29 +77,7 @@ const Room = () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("keydown", handleKeyDown as any);
     };
-  }, [roomName, isFocused, setIsZenMode, isCommandOpen]);
-
-  const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-
-      if (isFocused) {
-        if (!inputMessage) {
-          toast.error("Message cannot be empty");
-          unfocusInput();
-          return;
-        }
-
-        socket.emit("chat:send", { roomName, message: inputMessage });
-        setInputMessage("");
-        unfocusInput();
-      }
-    }
-
-    if (e.key === "Escape") {
-      unfocusInput();
-    }
-  };
+  }, [roomName, setIsZenMode, isCommandOpen, isChatFocused]);
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -128,7 +95,7 @@ const Room = () => {
         socket={socket}
       />
       <p
-        className="text-sm text-muted-foreground fixed left-16 bottom-6"
+        className="text-sm text-muted-foreground fixed left-16 bottom-6 z-10"
         onClick={() => setIsCommandOpen(true)}
       >
         Press{" "}
@@ -165,28 +132,11 @@ const Room = () => {
         <div className="h-1/2 p-8">
           <div>Question {data?.questions ? data.questions.length : 0}</div>
         </div>
-        <div className="h-1/2 border-t border-gray-100 dark:border-gray-700 p-8">
-          <h2>Chat</h2>
-          <Input
-            type="text"
-            placeholder={`${
-              isFocused ? "Press esc to unfocus" : "Press enter to type"
-            }`}
-            ref={inputRef}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            onKeyDown={handleInputKeyDown}
-            value={inputMessage}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setInputMessage(e.target.value)
-            }
-          />
-          <div>
-            {data?.chat.map((message: string, i: number) => (
-              <div key={`chat-${i}`}>{message}</div>
-            ))}
-          </div>
-        </div>
+        <Chat
+          roomName={roomName}
+          chat={data?.chat || []}
+          onFocusChange={setIsChatFocused}
+        />
       </div>
 
       <div

@@ -49,10 +49,16 @@ io.on("connection", (socket: ISocket) => {
       console.log(roomName, "has been created by", userName);
       console.log(userName, "has joined", roomName);
 
-      rooms[roomName].chat.unshift(
-        `${roomName} has been created by ${userName}`
-      );
-      rooms[roomName].chat.unshift(`${userName} has joined`);
+      rooms[roomName].chat.unshift({
+        author: "admin",
+        text: `${roomName} has been created by ${userName}`,
+        timestamp: Date.now()
+      });
+      rooms[roomName].chat.unshift({
+        author: "admin",
+        text: `${userName} has joined`,
+        timestamp: Date.now()
+      });
     } else {
       const existingMembers = rooms[roomName].teams.flatMap(
         (team) => team.members
@@ -76,7 +82,11 @@ io.on("connection", (socket: ISocket) => {
       await socket.join(roomName);
 
       console.log(userName, "has joined", roomName);
-      rooms[roomName].chat.unshift(`${userName} has joined`);
+      rooms[roomName].chat.unshift({
+        author: "admin",
+        text: `${userName} has joined`,
+        timestamp: Date.now()
+      });
     }
 
     socket.userName = userName;
@@ -123,7 +133,11 @@ io.on("connection", (socket: ISocket) => {
       }
     }
 
-    rooms[roomName].chat.unshift(`${socket.userName} has left`);
+    rooms[roomName].chat.unshift({
+      author: "admin",
+      text: `${socket.userName} has left`,
+      timestamp: Date.now()
+    });
 
     io.to(roomName).emit("room:update", rooms[roomName], {
       userName: socket.userName,
@@ -135,18 +149,23 @@ io.on("connection", (socket: ISocket) => {
 
   socket.on(
     "chat:send",
-    ({ roomName, message }: { roomName: string; message: string }) => {
+    ({ roomName, text }: { roomName: string; text: string }) => {
       if (!(roomName in rooms)) {
         return;
       }
 
-      if (message.trim() === "") {
+      if (text.trim() === "") {
         return;
       }
 
       console.log(socket.userName, "sent a message to", roomName);
 
-      rooms[roomName].chat.unshift(`${socket.userName}: ${message}`);
+      rooms[roomName].chat.unshift({
+        author: socket.userName,
+        team: socket.teamName,
+        text: text,
+        timestamp: Date.now()
+      });
 
       io.to(roomName).emit("room:update", rooms[roomName], {
         userName: socket.userName,
@@ -187,10 +206,17 @@ io.on("connection", (socket: ISocket) => {
 
       socket.teamName = teamName;
 
-      rooms[roomName].chat.unshift(`${userName} has added a team: ${teamName}`);
-      rooms[roomName].chat.unshift(`${userName} has joined ${teamName}`);
+      rooms[roomName].chat.unshift({
+        author: "admin",
+        text: `${userName} has added a team: ${teamName}`,
+        timestamp: Date.now()
+      });
+      rooms[roomName].chat.unshift({
+        author: "admin",
+        text: `${userName} has joined ${teamName}`,
+        timestamp: Date.now()
+      });
       console.log(userName, "has added a team: ", teamName);
-
       io.to(roomName).emit("room:update", rooms[roomName], {
         userName: userName,
         teamName: teamName
@@ -239,7 +265,11 @@ io.on("connection", (socket: ISocket) => {
 
       socket.teamName = teamName;
 
-      rooms[roomName].chat.unshift(`${userName} has joined ${teamName}`);
+      rooms[roomName].chat.unshift({
+        author: "admin",
+        text: `${userName} has joined ${teamName}`,
+        timestamp: Date.now()
+      });
       console.log(userName, "has joined team:", teamName);
 
       io.to(roomName).emit("room:update", rooms[roomName], {
