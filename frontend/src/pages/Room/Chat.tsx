@@ -31,18 +31,25 @@ export const Chat = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
   }, [isFocused, onFocusChange]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && !isFocused) {
+    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
+      // Handle Enter to focus
+      if (e.key === "Enter" && inputRef.current !== document.activeElement) {
         e.preventDefault();
         inputRef.current?.focus();
       }
+
+      // Handle Escape to unfocus
+      if (e.key === "Escape" && inputRef.current === document.activeElement) {
+        e.preventDefault();
+        unfocusInput();
+      }
     };
 
-    document.addEventListener("keydown", handleKeyDown as any);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener("keydown", handleKeyDown as any);
+      document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isFocused]);
+  }, [unfocusInput]);
 
   const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -62,6 +69,7 @@ export const Chat = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
     }
 
     if (e.key === "Escape") {
+      e.preventDefault();
       unfocusInput();
     }
   };

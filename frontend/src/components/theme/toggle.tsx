@@ -11,7 +11,7 @@ import { useTheme } from "./provider";
 import { cn } from "../../lib/utils";
 
 export function ModeToggle({ className }: { className?: string }) {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   return (
     <div className={cn(className)}>
@@ -24,13 +24,22 @@ export function ModeToggle({ className }: { className?: string }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setTheme("light")}>
+          <DropdownMenuItem
+            className={`${theme === "light" ? "font-bold" : ""}`}
+            onClick={() => setTheme("light")}
+          >
             Light
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme("dark")}>
+          <DropdownMenuItem
+            className={`${theme === "dark" ? "font-bold" : ""}`}
+            onClick={() => setTheme("dark")}
+          >
             Dark
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme("system")}>
+          <DropdownMenuItem
+            className={`${theme === "system" ? "font-bold" : ""}`}
+            onClick={() => setTheme("system")}
+          >
             System
           </DropdownMenuItem>
         </DropdownMenuContent>

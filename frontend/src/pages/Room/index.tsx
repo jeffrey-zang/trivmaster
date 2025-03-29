@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import socket from "@/lib/socket";
-import { useEffect, useState, useRef, KeyboardEvent } from "react";
+import { useEffect, useState, useRef } from "react";
 import type {
   Room as RoomType,
   ISocket,
@@ -58,16 +58,19 @@ const Room = () => {
       }
     };
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        (e.key === "z" || e.key === "Z") &&
-        !isChatFocused &&
-        !isCommandOpen
-      ) {
+    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
+      // Don't handle shortcuts if an input element is focused
+      if (document.activeElement instanceof HTMLInputElement) {
+        return;
+      }
+
+      // Z for zen mode
+      if (e.key === "z" || e.key === "Z") {
         e.preventDefault();
         setIsZenMode((prev) => !prev);
       }
 
+      // Cmd+K or Ctrl+K for command
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setIsCommandOpen((open) => !open);
@@ -75,13 +78,13 @@ const Room = () => {
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
-    document.addEventListener("keydown", handleKeyDown as any);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      document.removeEventListener("keydown", handleKeyDown as any);
+      document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [roomName, setIsZenMode, isCommandOpen, isChatFocused]);
+  }, [roomName]);
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
