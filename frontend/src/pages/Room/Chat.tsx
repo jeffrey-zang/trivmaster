@@ -87,24 +87,23 @@ export const Chat = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
   };
 
   return (
-    <div className="h-1/2 border-t border-gray-100 py-8 dark:border-gray-700">
-      <div className="px-8">
-        <Input
-          type="text"
-          placeholder={`${
-            isFocused ? "Press esc to unfocus" : "Press enter to type"
-          }`}
-          ref={inputRef}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          onKeyDown={handleInputKeyDown}
-          value={inputMessage}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setInputMessage(e.target.value)
-          }
-        />
-      </div>
-      <div className="overflow-y-scroll h-full px-8 pb-8 pt-4">
+    <div className="border-t border-gray-100 py-8 dark:border-gray-700 px-8 overflow-y-auto relative">
+      <Input
+        type="text"
+        placeholder={`${
+          isFocused ? "Press esc to unfocus" : "Press enter to type"
+        }`}
+        ref={inputRef}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        onKeyDown={handleInputKeyDown}
+        value={inputMessage}
+        className="sticky backdrop-blur-sm bg-white/60 border-b border-gray-100 dark:border-gray-700 top-0 left-0"
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setInputMessage(e.target.value)
+        }
+      />
+      <div className="mt-2">
         {chat?.map((message: Message, i: number) => {
           return (
             <div key={`chat-${i}`}>

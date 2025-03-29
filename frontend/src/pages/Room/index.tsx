@@ -106,60 +106,39 @@ const Room = () => {
       </p>
 
       <div
-        className={`w-1/5 light:bg-gray-200 dark:bg-gray-900 p-8 border-r light:border-gray-300 dark:border-gray-700 transition-opacity duration-150 h-full ${
+        className={`w-1/4 min-w-80 light:bg-gray-200 dark:bg-gray-900 border-r light:border-gray-300 dark:border-gray-700 transition-opacity duration-150 ${
           isZenMode ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
-        <h1 className="text-xl">
-          Room <span className="font-semibold">{roomName}</span>
-        </h1>
-        <p className="text-xs text-muted-foreground">
-          Created by <span className="font-semibold">{data?.createdBy}</span>
-        </p>
+        <div className="h-1/2 p-8">
+          <h1 className="text-xl">
+            Room <span className="font-semibold">{roomName}</span>
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            Created by <span className="font-semibold">{data?.createdBy}</span>
+          </p>
 
-        {data && (
-          <TeamComponent
-            teams={data.teams || {}}
-            roomName={roomName}
-            userName={member?.userName}
-            socket={socket}
-            currentBuzzed={data.currentBuzzed || null}
-            currentTeam={member?.teamName}
-          />
-        )}
+          {data && (
+            <TeamComponent
+              teams={data.teams || {}}
+              roomName={roomName}
+              userName={member?.userName}
+              socket={socket}
+              currentBuzzed={data.currentBuzzed || null}
+              currentTeam={member?.teamName}
+            />
+          )}
+        </div>
+
+        <div className="h-1/2">
+          <Chat data={data} roomName={roomName} chat={data?.chat || []} />
+        </div>
       </div>
 
-      <div className="w-3/5">
+      <div className="w-4/5">
         <div className="h-1/2 p-8">
           <div>Question {data?.questions ? data.questions.length : 0}</div>
         </div>
-        <Chat data={data} roomName={roomName} chat={data?.chat || []} />
-      </div>
-
-      <div
-        className={`w-1/5 p-8 border-l light:border-gray-300 dark:border-gray-700 h-full light:bg-gray-100 dark:bg-gray-900 transition-opacity duration-150 ${
-          isZenMode ? "opacity-0 pointer-events-none" : "opacity-100"
-        }`}
-      >
-        <h2 className="text-xl font-bold">Config</h2>
-        {data?.teams &&
-          Object.entries(data.teams).map(([teamName, team]: [string, Team]) => (
-            <div key={`team-${teamName}`}>
-              <h3>{team.teamName}</h3>
-              <div>
-                {team.members.map((member: Member, j: number) => (
-                  <div
-                    key={`member-${j}`}
-                    className={`${
-                      member.userName === member?.userName ? "bg-green-500" : ""
-                    }`}
-                  >
-                    {member.userName}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
       </div>
 
       <div ref={blurTargetRef} tabIndex={-1} style={{ outline: "none" }} />
