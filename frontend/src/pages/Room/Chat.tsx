@@ -14,7 +14,7 @@ interface ChatProps {
   onFocusChange?: (isFocused: boolean) => void;
 }
 
-export const Chat = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
+const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [inputMessage, setInputMessage] = useState<string>("");
@@ -134,3 +134,5 @@ export const Chat = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
     </div>
   );
 };
+
+export default ChatComponent;

@@ -26,7 +26,10 @@ export const setupRoomHandlers = (
         currentBuzzed: undefined,
         currentAnswered: false,
         chat: [],
-        createdBy: userName
+        createdBy: userName,
+        config: {
+          readingSpeed: 1
+        }
       };
 
       await socket.join(roomName);

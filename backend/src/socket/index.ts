@@ -3,7 +3,7 @@ import { ISocket, Room } from "@/types.ts";
 import { setupRoomHandlers } from "./roomHandlers.ts";
 import { setupChatHandlers } from "./chatHandlers.ts";
 import { setupTeamHandlers } from "./teamHandlers.ts";
-
+import { setupGameHandlers } from "./gameHandlers.ts";
 export const setupSocketIO = (io: Server) => {
   const rooms: Record<string, Room> = {};
 
@@ -11,6 +11,7 @@ export const setupSocketIO = (io: Server) => {
     setupRoomHandlers(io, socket, rooms);
     setupChatHandlers(io, socket, rooms);
     setupTeamHandlers(io, socket, rooms);
+    setupGameHandlers(io, socket, rooms);
   });
 
   return { rooms };

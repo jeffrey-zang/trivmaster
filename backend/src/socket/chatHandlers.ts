@@ -10,6 +10,7 @@ export const setupChatHandlers = (
     "chat:send",
     ({ roomName, text }: { roomName: string; text: string }) => {
       if (!(roomName in rooms)) {
+        socket.emit("room:error", "Room not found");
         return;
       }
 

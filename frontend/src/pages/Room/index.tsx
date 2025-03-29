@@ -1,11 +1,13 @@
 import { useParams } from "react-router-dom";
 import socket from "@/lib/socket";
 import { useEffect, useState, useRef } from "react";
-import type { Room as RoomType, ISocket, Team, Member } from "@/backend/types";
+import type { Room as RoomType, ISocket } from "@/backend/types";
 import { CommandComponent } from "@/components/command";
 import { useTheme } from "@/components/theme/provider";
-import { TeamComponent } from "./Team";
-import { Chat } from "./Chat";
+import { toast } from "sonner";
+import TeamComponent from "./Team";
+import QuestionComponent from "./Question";
+import ChatComponent from "./Chat";
 
 const Room = () => {
   const { roomName } = useParams();
@@ -38,10 +40,18 @@ const Room = () => {
       setMember(memberFromServer);
     };
 
+    const onRoomError = (error: string) => {
+      console.error("Room error:", error);
+      toast.error(error);
+    };
+
     socket.on("room:update", onRoomUpdate);
+
+    socket.on("room:error", onRoomError);
 
     return () => {
       socket.off("room:update", onRoomUpdate);
+      socket.off("room:error", onRoomError);
     };
   }, []);
 
@@ -131,14 +141,16 @@ const Room = () => {
         </div>
 
         <div className="h-1/2">
-          <Chat data={data} roomName={roomName} chat={data?.chat || []} />
+          <ChatComponent
+            data={data}
+            roomName={roomName}
+            chat={data?.chat || []}
+          />
         </div>
       </div>
 
       <div className="w-4/5">
-        <div className="h-1/2 p-8">
-          <div>Question {data?.questions ? data.questions.length : 0}</div>
-        </div>
+        <QuestionComponent data={data} />
       </div>
 
       <div ref={blurTargetRef} tabIndex={-1} style={{ outline: "none" }} />

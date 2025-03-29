@@ -15,7 +15,11 @@ export interface Room {
   currentQuestion?: Question;
   currentBuzzed?: string;
   currentAnswered: boolean;
-  // config: RoomConfig;
+  config: RoomConfig;
+}
+
+export interface RoomConfig {
+  readingSpeed: number; // 0-2, default 1
 }
 
 export interface Message {
@@ -40,8 +44,8 @@ export interface Member {
 }
 
 export type Question = {
-  question: string;
-  answer: string;
-  category?: string;
+  q: string;
+  a: string;
+  type?: string;
   value?: number;
 };

@@ -27,7 +27,7 @@ interface TeamProps {
   currentTeam: string | undefined;
 }
 
-export const TeamComponent = ({
+const TeamComponent = ({
   teams,
   roomName,
   userName,
@@ -225,3 +225,5 @@ export const TeamComponent = ({
     </>
   );
 };
+
+export default TeamComponent;
