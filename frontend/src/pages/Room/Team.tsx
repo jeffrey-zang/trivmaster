@@ -13,7 +13,7 @@ import {
   Label,
   Input
 } from "@/components/ui";
-import { Team, Member } from "@/backend/src/types";
+import { Team, Member } from "@/backend/types";
 import { getColorWithOpacity } from "@/lib/utils";
 
 type DialogType = "addTeam" | "joinTeam" | null;

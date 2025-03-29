@@ -9,8 +9,6 @@ export const setupRoomHandlers = (
   socket.on("room:join", async ({ roomName }: { roomName: string }) => {
     const createRoom = !(roomName in rooms);
 
-    console.log(rooms[roomName]);
-
     let userName = "Guest";
     if (createRoom) {
       rooms[roomName] = {

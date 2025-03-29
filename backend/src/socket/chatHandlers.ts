@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { ISocket, Room } from "../types.ts";
+import { ISocket, Room } from "@/types.ts";
 
 export const setupChatHandlers = (
   io: Server,

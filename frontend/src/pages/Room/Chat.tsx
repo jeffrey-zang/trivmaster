@@ -2,13 +2,13 @@ import { KeyboardEvent, useRef, useState, useCallback, useEffect } from "react";
 import { Input } from "@/components/ui";
 import { toast } from "sonner";
 import socket from "@/lib/socket";
-import { Message } from "@/backend/src/types";
-import { Room as RoomType } from "@/backend/src/types";
+import { Message } from "@/backend/types";
+import { Room as RoomType } from "@/backend/types";
 import { getColorWithOpacity } from "@/lib/utils";
 import DOMPurify from "dompurify";
 
 interface ChatProps {
-  data: RoomType;
+  data: RoomType | null;
   roomName: string | undefined;
   chat: Message[];
   onFocusChange?: (isFocused: boolean) => void;
@@ -119,7 +119,7 @@ export const Chat = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
                     className={`font-bold mr-2`}
                     style={{
                       backgroundColor: getColorWithOpacity(
-                        data?.teams[message.team]?.colour
+                        data?.teams[message.team || ""]?.colour || "gray"
                       )
                     }}
                   >

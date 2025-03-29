@@ -1,12 +1,7 @@
 import { useParams } from "react-router-dom";
 import socket from "@/lib/socket";
 import { useEffect, useState, useRef } from "react";
-import type {
-  Room as RoomType,
-  ISocket,
-  Team,
-  Member
-} from "@/backend/src/types";
+import type { Room as RoomType, ISocket, Team, Member } from "@/backend/types";
 import { CommandComponent } from "@/components/command";
 import { useTheme } from "@/components/theme/provider";
 import { TeamComponent } from "./Team";
@@ -23,7 +18,6 @@ const Room = () => {
 
   const [isZenMode, setIsZenMode] = useState(false);
   const [isCommandOpen, setIsCommandOpen] = useState(false);
-  const [isChatFocused, setIsChatFocused] = useState(false);
 
   useEffect(() => {
     if (!roomName) return;
@@ -129,7 +123,7 @@ const Room = () => {
             roomName={roomName}
             userName={member?.userName}
             socket={socket}
-            currentBuzzed={data.currentBuzzed}
+            currentBuzzed={data.currentBuzzed || null}
             currentTeam={member?.teamName}
           />
         )}
@@ -139,12 +133,7 @@ const Room = () => {
         <div className="h-1/2 p-8">
           <div>Question {data?.questions ? data.questions.length : 0}</div>
         </div>
-        <Chat
-          data={data}
-          roomName={roomName}
-          chat={data?.chat || []}
-          onFocusChange={setIsChatFocused}
-        />
+        <Chat data={data} roomName={roomName} chat={data?.chat || []} />
       </div>
 
       <div
