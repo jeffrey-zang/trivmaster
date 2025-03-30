@@ -151,7 +151,7 @@ const TeamComponent = ({
       {Object.entries(teams).map(([teamName, team]: [string, Team]) => (
         <div
           key={`team-${teamName}`}
-          className={`mt-2 border border-gray-200 dark:border-gray-700 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150`}
+          className={`mt-2 border border-gray-200 dark:border-gray-700 p-2 rounded-lg hover:opacity-80 transition-opacity duration-150`}
           style={{
             backgroundColor: getColorWithOpacity(team.colour)
           }}

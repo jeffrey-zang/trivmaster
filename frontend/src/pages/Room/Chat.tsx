@@ -76,7 +76,7 @@ const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
         onBlur={() => setIsFocused(false)}
         onKeyDown={handleInputKeyDown}
         value={inputMessage}
-        className="sticky backdrop-blur-sm bg-white/60 border-b border-gray-100 dark:border-gray-700 top-4 left-0"
+        className="sticky backdrop-blur-sm bg-white/60 border-b border-gray-300 dark:border-gray-700 top-4 left-0"
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           setInputMessage(e.target.value)
         }
