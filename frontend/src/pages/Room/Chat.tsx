@@ -1,7 +1,6 @@
 import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import DOMPurify from "dompurify";
 import { toast } from "sonner";
-import { Send } from "lucide-react";
 
 import { Input } from "@/components/ui";
 import socket from "@/lib/socket";
@@ -33,15 +32,6 @@ const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
     setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus();
-        try {
-          inputRef.current.setSelectionRange(
-            inputRef.current.value.length,
-            inputRef.current.value.length
-          );
-        } catch (e) {
-          console.log("Selection range error:", e);
-        }
-        setIsFocused(true);
       }
     }, 10);
   }, []);
@@ -108,7 +98,6 @@ const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
           setInputMessage(e.target.value)
         }
         onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-          console.log("Key pressed:", e.key);
           if (e.key === "Enter") {
             e.preventDefault();
             sendMessage();

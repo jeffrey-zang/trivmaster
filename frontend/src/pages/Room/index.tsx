@@ -1,12 +1,10 @@
-import { Cloud, SunMoon } from "lucide-react";
 import { toast } from "sonner";
 import { useParams } from "react-router-dom";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import socket from "@/lib/socket";
 import type { ISocket, Room as RoomType } from "@/backend/types";
 import { ShortcutConfig, useRegisterShortcuts } from "@/hooks/shortcut";
-import { useTheme } from "@/contexts/theme/provider";
 
 import ChatComponent from "./Chat";
 import QuestionComponent from "./Question";
@@ -14,7 +12,6 @@ import TeamComponent from "./Team";
 
 const Room = () => {
   const { roomName } = useParams();
-  const { theme, setTheme } = useTheme();
 
   const blurTargetRef = useRef<HTMLDivElement>(null);
 
@@ -36,10 +33,13 @@ const Room = () => {
   }, [roomName]);
 
   useEffect(() => {
-    const onRoomUpdate = (roomData: RoomType, memberFromServer: ISocket) => {
+    const onRoomUpdate = (roomData: RoomType, memberFromServer?: ISocket) => {
       console.log("Room updated:", roomData);
       setData(roomData);
-      setMember(memberFromServer);
+
+      if (memberFromServer) {
+        setMember(memberFromServer);
+      }
     };
 
     const onRoomError = (error: string) => {
@@ -92,7 +92,7 @@ const Room = () => {
         }`}
       >
         <div className="h-1/2 overflow-y-auto relative">
-          <div className="sticky top-0 left-0 p-8 pb-4 border-b border-gray-300 dark:border-gray-700">
+          <div className="sticky top-0 left-0 p-8 pb-4 border-b border-gray-300 dark:border-gray-700 bg-white">
             <h1 className="text-xl">
               Room <span className="font-semibold">{roomName}</span>
             </h1>

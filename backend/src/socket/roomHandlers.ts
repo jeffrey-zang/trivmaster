@@ -37,8 +37,13 @@ export const setupRoomHandlers = (
 
       await socket.join(roomName);
 
+      socket.userName = userName;
+      socket.teamName = "Lobby";
+
       console.log(roomName, "been created by", userName);
-      console.log(userName, "joined", roomName);
+      console.log(
+        `${userName} joined ${roomName} (${socket.id}, ${socket.userName})`
+      );
 
       rooms[roomName].chat.unshift({
         author: "admin",
@@ -68,10 +73,22 @@ export const setupRoomHandlers = (
 
       if (!(roomName in rooms)) {
         rooms[roomName] = defaultRoom;
+      } else {
+        rooms[roomName].teams.Lobby.members.push({
+          userName: userName,
+          points: 0,
+          buzzed: false
+        });
       }
+
+      socket.userName = userName;
+      socket.teamName = "Lobby";
+
       await socket.join(roomName);
 
-      console.log(userName, "joined", roomName);
+      console.log(
+        `${userName} joined ${roomName} (${socket.id}, ${socket.userName})`
+      );
       rooms[roomName].chat.unshift({
         author: "admin",
         text: `<span>${userName} joined</span>`,
@@ -80,18 +97,14 @@ export const setupRoomHandlers = (
       });
     }
 
-    socket.userName = userName;
-    socket.teamName = "Lobby";
+    console.log(socket.id, socket.userName);
 
     socket.emit("room:update", rooms[roomName], {
       userName: userName,
       teamName: "Lobby"
     });
 
-    socket.to(roomName).emit("room:update", rooms[roomName], {
-      userName: userName,
-      teamName: "Lobby"
-    });
+    socket.to(roomName).emit("room:update", rooms[roomName]);
   });
 
   socket.on("room:leave", async ({ roomName }: { roomName: string }) => {
@@ -112,7 +125,10 @@ export const setupRoomHandlers = (
         userTeamName
       ].members.filter((member: Member) => member.userName !== socket.userName);
 
-      if (rooms[roomName].teams[userTeamName].members.length === 0) {
+      if (
+        rooms[roomName].teams[userTeamName].members.length === 0 &&
+        userTeamName !== "Lobby"
+      ) {
         delete rooms[roomName].teams[userTeamName];
       }
     }
@@ -132,10 +148,7 @@ export const setupRoomHandlers = (
       tsx: true
     });
 
-    io.to(roomName).emit("room:update", rooms[roomName], {
-      userName: socket.userName,
-      teamName: socket.teamName
-    });
+    io.to(roomName).emit("room:update", rooms[roomName]);
 
     socket.offAny();
   });

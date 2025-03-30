@@ -4,6 +4,7 @@ import { setupRoomHandlers } from "./roomHandlers.ts";
 import { setupChatHandlers } from "./chatHandlers.ts";
 import { setupTeamHandlers } from "./teamHandlers.ts";
 import { setupGameHandlers } from "./gameHandlers.ts";
+
 export const setupSocketIO = (io: Server) => {
   const rooms: Record<string, Room> = {};
 
