@@ -1,5 +1,5 @@
 import { Toaster } from "sonner";
-import { useTheme } from "../theme/provider";
+import { useTheme } from "../../contexts/theme/provider";
 
 const ToasterComponent = () => {
   const { theme } = useTheme();

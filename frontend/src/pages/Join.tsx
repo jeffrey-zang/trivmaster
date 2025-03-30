@@ -1,3 +1,7 @@
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+
 import {
   Card,
   CardContent,
@@ -6,10 +10,7 @@ import {
   CardTitle,
   Button,
   Input
-} from "../components/ui";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+} from "@/components/ui";
 
 const Join = () => {
   const navigate = useNavigate();

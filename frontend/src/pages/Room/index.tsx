@@ -1,27 +1,30 @@
-import { useParams } from "react-router-dom";
-import socket from "@/lib/socket";
-import { useEffect, useState, useRef } from "react";
-import type { Room as RoomType, ISocket } from "@/backend/types";
-import { CommandComponent } from "@/components/command";
-import { useTheme } from "@/components/theme/provider";
+import { Cloud, SunMoon } from "lucide-react";
 import { toast } from "sonner";
-import TeamComponent from "./Team";
-import QuestionComponent from "./Question";
+import { useParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import socket from "@/lib/socket";
+import type { ISocket, Room as RoomType } from "@/backend/types";
+import { ShortcutConfig, useRegisterShortcuts } from "@/hooks/shortcut";
+import { useRegisterCommands } from "@/hooks/command";
+import { useTheme } from "@/contexts/theme/provider";
+import { useCommandContext } from "@/contexts/command/provider";
+
 import ChatComponent from "./Chat";
-import ShortcutManager, { createRoomShortcuts } from "@/lib/shortcuts";
+import QuestionComponent from "./Question";
+import TeamComponent from "./Team";
 
 const Room = () => {
   const { roomName } = useParams();
   const { theme, setTheme } = useTheme();
 
   const blurTargetRef = useRef<HTMLDivElement>(null);
-  const shortcutManagerRef = useRef<ShortcutManager | null>(null);
 
   const [data, setData] = useState<RoomType | null>(null);
   const [member, setMember] = useState<ISocket | null>(null);
 
   const [isZenMode, setIsZenMode] = useState(false);
-  const [isCommandOpen, setIsCommandOpen] = useState(false);
+  const { setIsCommandOpen } = useCommandContext();
 
   useEffect(() => {
     if (!roomName) return;
@@ -66,34 +69,105 @@ const Room = () => {
 
     window.addEventListener("beforeunload", handleBeforeUnload);
 
-    shortcutManagerRef.current = new ShortcutManager();
-    const shortcuts = createRoomShortcuts(
-      setIsZenMode,
-      setIsCommandOpen,
-      socket,
-      roomName
-    );
-    shortcutManagerRef.current.registerShortcuts(shortcuts);
-    shortcutManagerRef.current.startListening();
-
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      shortcutManagerRef.current?.stopListening();
     };
   }, [roomName]);
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     setTheme(theme === "dark" ? "light" : "dark");
-  };
+  }, [theme, setTheme]);
+
+  const commands = useMemo(
+    () => [
+      {
+        name: "Toggle Zen mode",
+        shortcut: "z",
+        icon: <Cloud className="mr-2 h-4 w-4" />,
+        action: () => {
+          setIsZenMode((prev) => !prev);
+        }
+      },
+      {
+        name: "Toggle theme",
+        icon: <SunMoon className="mr-2 h-4 w-4" />,
+        action: () => {
+          toggleTheme();
+        }
+      }
+    ],
+    [toggleTheme, setIsZenMode]
+  );
+
+  useRegisterCommands("Suggestions", commands, [commands]);
+
+  const roomShortcuts = useMemo(
+    (): ShortcutConfig[] => [
+      {
+        key: "z",
+        action: () => setIsZenMode((prev) => !prev),
+        description: "Toggle zen mode"
+      },
+      {
+        key: "k",
+        modifier: "meta",
+        action: () => setIsCommandOpen((prev) => !prev),
+        description: "Toggle command palette"
+      },
+      {
+        key: "Enter",
+        condition: () => !(document.activeElement instanceof HTMLInputElement),
+        action: () => {
+          const chatInput = document.querySelector(
+            'input[placeholder*="Press enter to type"]'
+          ) as HTMLInputElement;
+          if (chatInput) chatInput.focus();
+        },
+        description: "Focus chat input"
+      },
+      {
+        key: "Escape",
+        condition: () => document.activeElement instanceof HTMLInputElement,
+        action: () => {
+          const activeElement = document.activeElement as HTMLElement;
+          if (activeElement) activeElement.blur();
+        },
+        description: "Blur active input"
+      }
+    ],
+    [setIsZenMode, setIsCommandOpen]
+  );
+
+  useRegisterShortcuts("Room", roomShortcuts, [roomShortcuts]);
+
+  const gameShortcuts = useMemo(
+    (): ShortcutConfig[] => [
+      {
+        key: "p",
+        condition: () => !!roomName && !!socket,
+        action: () => {
+          if (!roomName || !socket) return;
+          socket.emit("game:pause", { roomName });
+        },
+        description: "Pause/resume game"
+      },
+      {
+        key: " ", // space
+        condition: () => !!roomName && !!socket,
+        action: () => {
+          if (!roomName || !socket) return;
+          socket.emit("game:buzz", { roomName });
+        },
+        description: "Buzz"
+      }
+    ],
+    [roomName]
+  );
+
+  useRegisterShortcuts("Game", gameShortcuts, [gameShortcuts, roomName]);
 
   return (
     <div className="flex h-screen">
-      <CommandComponent
-        isCommandOpen={isCommandOpen}
-        setIsCommandOpen={setIsCommandOpen}
-        setIsZenMode={setIsZenMode}
-        toggleTheme={toggleTheme}
-      />
       <p
         className="text-sm text-muted-foreground fixed right-16 bottom-6 z-10"
         onClick={() => setIsCommandOpen(true)}

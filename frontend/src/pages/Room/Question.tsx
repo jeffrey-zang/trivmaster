@@ -1,5 +1,6 @@
-import { Room as RoomType, Question } from "@/backend/types";
 import { useState, useEffect } from "react";
+
+import { Room as RoomType, Question } from "@/backend/types";
 import { Button } from "@/components/ui/button";
 import socket from "@/lib/socket";
 
@@ -42,7 +43,7 @@ const QuestionComponent = ({ data }: QuestionProps) => {
 
   return (
     <div className="flex flex-col gap-4 p-8">
-      {true ? (
+      {data?.currentQuestion ? (
         <div>
           <div className="text-sm text-muted-foreground">
             Question #{data?.questions?.indexOf(currentQuestion) ?? 0 + 1}

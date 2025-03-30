@@ -1,11 +1,14 @@
-import { KeyboardEvent, useRef, useState, useCallback, useEffect } from "react";
-import { Input } from "@/components/ui";
-import { toast } from "sonner";
-import socket from "@/lib/socket";
-import { Message } from "@/backend/types";
-import { Room as RoomType } from "@/backend/types";
-import { getColorWithOpacity } from "@/lib/utils";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import DOMPurify from "dompurify";
+import { toast } from "sonner";
+import { Send } from "lucide-react";
+
+import { Input } from "@/components/ui";
+import socket from "@/lib/socket";
+import { Message, Room as RoomType } from "@/backend/types";
+import { getColorWithOpacity } from "@/lib/utils";
+import { useRegisterCommands } from "@/hooks/command";
+import { useRegisterShortcuts } from "@/hooks/shortcut";
 
 interface ChatProps {
   data: RoomType | null;
@@ -26,32 +29,60 @@ const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
     setIsFocused(false);
   }, []);
 
+  const focusInput = useCallback(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+    setIsFocused(true);
+  }, []);
+
   useEffect(() => {
     onFocusChange?.(isFocused);
   }, [isFocused, onFocusChange]);
 
-  const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-
-      if (isFocused) {
-        if (!inputMessage) {
-          toast.error("Message cannot be empty");
-          unfocusInput();
-          return;
-        }
-
-        socket.emit("chat:send", { roomName, text: inputMessage });
-        setInputMessage("");
-        unfocusInput();
+  const chatCommands = useMemo(
+    () => [
+      {
+        name: "Type in chat",
+        shortcut: "Enter",
+        icon: <Send className="mr-2 h-4 w-4" />,
+        action: focusInput
       }
+    ],
+    [focusInput]
+  );
+
+  useRegisterCommands("Chat", chatCommands, [chatCommands]);
+
+  const sendMessage = useCallback(() => {
+    if (!inputMessage) {
+      toast.error("Message cannot be empty");
+      unfocusInput();
+      return;
     }
 
-    if (e.key === "Escape") {
-      e.preventDefault();
-      unfocusInput();
-    }
-  };
+    socket.emit("chat:send", { roomName, text: inputMessage });
+    setInputMessage("");
+    unfocusInput();
+  }, [inputMessage, roomName, unfocusInput]);
+
+  const chatShortcuts = useMemo(
+    () => [
+      {
+        key: "Enter",
+        action: sendMessage,
+        condition: () => isFocused && !!inputRef.current?.value.trim()
+      },
+      {
+        key: "Escape",
+        action: unfocusInput,
+        condition: () => isFocused
+      }
+    ],
+    [sendMessage, unfocusInput, isFocused]
+  );
+
+  useRegisterShortcuts("ChatInput", chatShortcuts, [chatShortcuts]);
 
   const renderMessageContent = (message: Message) => {
     if (message.tsx) {
@@ -74,7 +105,6 @@ const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
         ref={inputRef}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        onKeyDown={handleInputKeyDown}
         value={inputMessage}
         className="sticky backdrop-blur-sm bg-white/60 border-b border-gray-300 dark:border-gray-700 top-4 left-0"
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
