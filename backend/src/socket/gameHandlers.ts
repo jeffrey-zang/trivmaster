@@ -72,4 +72,21 @@ export const setupGameHandlers = (
 
     io.to(roomName).emit("room:update", room);
   });
+
+  socket.on("game:buzz", ({ roomName }: { roomName: string }) => {
+    const room = rooms[roomName];
+
+    if (!room) {
+      socket.emit("room:error", "Room not found");
+      return;
+    }
+
+    if (room.state !== "reading") {
+      socket.emit("room:error", "Game not in reading state");
+      return;
+    }
+
+    room.currentBuzzed = socket.id;
+    io.to(roomName).emit("room:update", room);
+  });
 };

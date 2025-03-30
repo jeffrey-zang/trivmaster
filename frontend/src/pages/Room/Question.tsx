@@ -28,17 +28,59 @@ const QuestionComponent = ({ data }: QuestionProps) => {
     }
   }, [data]);
 
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "p" && !data?.currentQuestion) {
+        handleStartGame();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [data]);
+
   const handleStartGame = () => {
-    console.log("Starting game");
     socket.emit("game:start", { roomName: data?.roomName });
+  };
+
+  const handleBuzz = () => {
+    socket.emit("game:buzz", { roomName: data?.roomName });
+  };
+
+  const handlePauseGame = () => {
+    socket.emit("game:pause", { roomName: data?.roomName });
   };
 
   return (
     <div className="flex flex-col gap-4 p-8">
-      {data?.currentQuestion ? (
+      {true ? (
         <div>
-          <div>Question #{data.questions.indexOf(currentQuestion) + 1}</div>
-          <div>{currentQuestion.q}</div>
+          <div className="text-sm text-muted-foreground">
+            Question #{data?.questions?.indexOf(currentQuestion) ?? 0 + 1}
+          </div>
+          <div className="text-lg mt-1">{currentQuestion.q}</div>
+          <div className="flex gap-2">
+            <Button
+              className="flex items-center gap-2 mt-4"
+              onClick={handleBuzz}
+            >
+              Buzz
+              <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <span className="text-xs">space</span>
+              </kbd>
+            </Button>
+
+            <Button
+              variant="secondary"
+              className="flex items-center gap-2 mt-4"
+              onClick={handlePauseGame}
+            >
+              Pause
+              <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <span className="text-xs">p</span>
+              </kbd>
+            </Button>
+          </div>
         </div>
       ) : (
         <div>
@@ -48,7 +90,7 @@ const QuestionComponent = ({ data }: QuestionProps) => {
             className="flex items-center gap-2 mt-4"
             onClick={handleStartGame}
           >
-            Start
+            Play
             <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               <span className="text-xs">p</span>
             </kbd>

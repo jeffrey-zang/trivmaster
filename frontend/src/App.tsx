@@ -8,7 +8,7 @@ import ToasterComponent from "./components/toaster";
 const App = () => {
   return (
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-      <ModeToggle className="fixed bottom-4 left-4 z-10" />
+      <ModeToggle className="fixed bottom-4 right-4 z-10" />
       <ToasterComponent />
 
       <BrowserRouter>

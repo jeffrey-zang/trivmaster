@@ -1,4 +1,4 @@
-import { useState, KeyboardEvent, useEffect } from "react";
+import { useState, KeyboardEvent } from "react";
 import { Socket } from "socket.io-client";
 import { toast } from "sonner";
 import { Zap } from "lucide-react";
@@ -146,8 +146,8 @@ const TeamComponent = ({
   };
 
   return (
-    <>
-      <h2 className="font-semibold mt-8">Teams</h2>
+    <div className="px-8">
+      <h2 className="font-semibold mt-4">Teams</h2>
       {Object.entries(teams).map(([teamName, team]: [string, Team]) => (
         <div
           key={`team-${teamName}`}
@@ -222,7 +222,7 @@ const TeamComponent = ({
           {renderDialogContent()}
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 };
 

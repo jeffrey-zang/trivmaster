@@ -16,6 +16,7 @@ export interface Room {
   currentBuzzed?: string;
   currentAnswered: boolean;
   config: RoomConfig;
+  state: "waiting" | "reading" | "buzzing" | "answering";
 }
 
 export interface RoomConfig {
