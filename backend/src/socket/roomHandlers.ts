@@ -8,29 +8,32 @@ export const setupRoomHandlers = (
 ) => {
   socket.on("room:join", async ({ roomName }: { roomName: string }) => {
     const createRoom = !(roomName in rooms);
-
     let userName = "Guest";
-    if (createRoom) {
-      rooms[roomName] = {
-        roomName: roomName,
-        questions: [],
-        teams: {
-          Lobby: {
-            teamName: "Lobby",
-            members: [{ userName: userName, points: 0, buzzed: false }],
-            points: 0,
-            colour: "#808080"
-          }
-        },
-        currentQuestion: undefined,
-        currentBuzzed: undefined,
-        currentAnswered: false,
-        chat: [],
-        createdBy: userName,
-        config: {
-          readingSpeed: 1
+
+    const defaultRoom: Room = {
+      roomName: roomName,
+      questions: [],
+      teams: {
+        Lobby: {
+          teamName: "Lobby",
+          members: [{ userName: userName, points: 0, buzzed: false }],
+          points: 0,
+          colour: "#808080"
         }
-      };
+      },
+      currentQuestion: undefined,
+      currentBuzzed: undefined,
+      currentAnswered: false,
+      chat: [],
+      createdBy: userName,
+      config: {
+        readingSpeed: 1
+      },
+      state: "waiting"
+    };
+
+    if (createRoom) {
+      rooms[roomName] = defaultRoom;
 
       await socket.join(roomName);
 
@@ -63,12 +66,9 @@ export const setupRoomHandlers = (
         i++;
       }
 
-      rooms[roomName].teams["Lobby"].members.push({
-        userName: userName,
-        points: 0,
-        buzzed: false
-      });
-
+      if (!(roomName in rooms)) {
+        rooms[roomName] = defaultRoom;
+      }
       await socket.join(roomName);
 
       console.log(userName, "joined", roomName);

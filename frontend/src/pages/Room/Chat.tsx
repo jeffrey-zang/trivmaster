@@ -30,27 +30,6 @@ const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
     onFocusChange?.(isFocused);
   }, [isFocused, onFocusChange]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
-      // Handle Enter to focus
-      if (e.key === "Enter" && inputRef.current !== document.activeElement) {
-        e.preventDefault();
-        inputRef.current?.focus();
-      }
-
-      // Handle Escape to unfocus
-      if (e.key === "Escape" && inputRef.current === document.activeElement) {
-        e.preventDefault();
-        unfocusInput();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [unfocusInput]);
-
   const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -74,7 +53,6 @@ const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
     }
   };
 
-  // Function to render message content based on whether it's TSX or plain text
   const renderMessageContent = (message: Message) => {
     if (message.tsx) {
       return (
@@ -87,7 +65,7 @@ const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
   };
 
   return (
-    <div className="border-t border-gray-100 py-8 dark:border-gray-700 px-8 overflow-y-auto relative">
+    <div className="border-t border-gray-300 pb-8 dark:border-gray-700 px-8">
       <Input
         type="text"
         placeholder={`${
@@ -98,12 +76,12 @@ const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
         onBlur={() => setIsFocused(false)}
         onKeyDown={handleInputKeyDown}
         value={inputMessage}
-        className="sticky backdrop-blur-sm bg-white/60 border-b border-gray-100 dark:border-gray-700 top-0 left-0"
+        className="sticky backdrop-blur-sm bg-white/60 border-b border-gray-100 dark:border-gray-700 top-4 left-0"
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           setInputMessage(e.target.value)
         }
       />
-      <div className="mt-2">
+      <div className="mt-4">
         {chat?.map((message: Message, i: number) => {
           return (
             <div key={`chat-${i}`}>

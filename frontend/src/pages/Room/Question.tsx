@@ -28,17 +28,6 @@ const QuestionComponent = ({ data }: QuestionProps) => {
     }
   }, [data]);
 
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === "p" && !data?.currentQuestion) {
-        handleStartGame();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [data]);
-
   const handleStartGame = () => {
     socket.emit("game:start", { roomName: data?.roomName });
   };

@@ -27,11 +27,8 @@ export const CommandComponent = ({
 }: {
   isCommandOpen: boolean;
   setIsCommandOpen: (isOpen: boolean) => void;
-  setIsZenMode?: (isZen: boolean | ((prev: boolean) => boolean)) => void;
+  setIsZenMode?: React.Dispatch<React.SetStateAction<boolean>>;
   toggleTheme?: () => void;
-  roomName?: string;
-  userName?: string;
-  socket?: any;
 }) => {
   const commands = [
     "Suggestions",

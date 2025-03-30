@@ -8,12 +8,14 @@ import { toast } from "sonner";
 import TeamComponent from "./Team";
 import QuestionComponent from "./Question";
 import ChatComponent from "./Chat";
+import ShortcutManager, { createRoomShortcuts } from "@/lib/shortcuts";
 
 const Room = () => {
   const { roomName } = useParams();
   const { theme, setTheme } = useTheme();
 
   const blurTargetRef = useRef<HTMLDivElement>(null);
+  const shortcutManagerRef = useRef<ShortcutManager | null>(null);
 
   const [data, setData] = useState<RoomType | null>(null);
   const [member, setMember] = useState<ISocket | null>(null);
@@ -62,31 +64,21 @@ const Room = () => {
       }
     };
 
-    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
-      // Don't handle shortcuts if an input element is focused
-      if (document.activeElement instanceof HTMLInputElement) {
-        return;
-      }
-
-      // Z for zen mode
-      if (e.key === "z" || e.key === "Z") {
-        e.preventDefault();
-        setIsZenMode((prev) => !prev);
-      }
-
-      // Cmd+K or Ctrl+K for command
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setIsCommandOpen((open) => !open);
-      }
-    };
-
     window.addEventListener("beforeunload", handleBeforeUnload);
-    document.addEventListener("keydown", handleKeyDown);
+
+    shortcutManagerRef.current = new ShortcutManager();
+    const shortcuts = createRoomShortcuts(
+      setIsZenMode,
+      setIsCommandOpen,
+      socket,
+      roomName
+    );
+    shortcutManagerRef.current.registerShortcuts(shortcuts);
+    shortcutManagerRef.current.startListening();
 
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      document.removeEventListener("keydown", handleKeyDown);
+      shortcutManagerRef.current?.stopListening();
     };
   }, [roomName]);
 
@@ -101,12 +93,9 @@ const Room = () => {
         setIsCommandOpen={setIsCommandOpen}
         setIsZenMode={setIsZenMode}
         toggleTheme={toggleTheme}
-        roomName={roomName || undefined}
-        userName={member?.userName || undefined}
-        socket={socket}
       />
       <p
-        className="text-sm text-muted-foreground fixed left-16 bottom-6 z-10"
+        className="text-sm text-muted-foreground fixed right-16 bottom-6 z-10"
         onClick={() => setIsCommandOpen(true)}
       >
         Press{" "}
@@ -116,17 +105,20 @@ const Room = () => {
       </p>
 
       <div
-        className={`w-1/4 min-w-80 light:bg-gray-200 dark:bg-gray-900 border-r light:border-gray-300 dark:border-gray-700 transition-opacity duration-150 ${
+        className={`w-1/4 min-w-80 dark:bg-gray-900 border-r border-gray-300 dark:border-gray-700 transition-opacity duration-150 ${
           isZenMode ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
-        <div className="h-1/2 p-8">
-          <h1 className="text-xl">
-            Room <span className="font-semibold">{roomName}</span>
-          </h1>
-          <p className="text-xs text-muted-foreground">
-            Created by <span className="font-semibold">{data?.createdBy}</span>
-          </p>
+        <div className="h-1/2 overflow-y-auto relative">
+          <div className="sticky top-0 left-0 p-8 pb-4 border-b border-gray-300 dark:border-gray-700">
+            <h1 className="text-xl">
+              Room <span className="font-semibold">{roomName}</span>
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              Created by{" "}
+              <span className="font-semibold">{data?.createdBy}</span>
+            </p>
+          </div>
 
           {data && (
             <TeamComponent
@@ -140,7 +132,7 @@ const Room = () => {
           )}
         </div>
 
-        <div className="h-1/2">
+        <div className="h-1/2 overflow-y-auto relative">
           <ChatComponent
             data={data}
             roomName={roomName}
