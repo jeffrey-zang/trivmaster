@@ -6,11 +6,6 @@ export interface ShortcutConfig {
   description?: string;
 }
 
-export interface ShortcutSection {
-  heading: string;
-  shortcuts: ShortcutConfig[];
-}
-
 export interface ShortcutManagerOptions {
   excludeWhenInputFocused?: boolean;
 }

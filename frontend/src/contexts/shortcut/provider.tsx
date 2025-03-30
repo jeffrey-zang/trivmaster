@@ -1,21 +1,11 @@
 import { createContext, useContext, ReactNode } from "react";
-import {
-  ShortcutConfig,
-  ShortcutSection,
-  ShortcutManagerOptions
-} from "@/hooks/shortcut/types";
+import { ShortcutConfig, ShortcutManagerOptions } from "@/hooks/shortcut/types";
 import { useShortcuts } from "@/hooks/shortcut/useShortcuts";
 
 interface ShortcutContextValue {
-  shortcutSections: ShortcutSection[];
-  registerSection: (section: ShortcutSection) => void;
-  registerShortcut: (sectionHeading: string, shortcut: ShortcutConfig) => void;
-  unregisterSection: (sectionHeading: string) => void;
-  unregisterShortcut: (
-    sectionHeading: string,
-    key: string,
-    modifier?: string
-  ) => void;
+  shortcuts: ShortcutConfig[];
+  registerShortcut: (shortcut: ShortcutConfig) => void;
+  unregisterShortcut: (key: string, modifier?: string) => void;
 }
 
 const ShortcutContext = createContext<ShortcutContextValue | undefined>(

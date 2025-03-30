@@ -1,20 +1,57 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import { Room as RoomType, Question } from "@/backend/types";
 import { Button } from "@/components/ui/button";
 import socket from "@/lib/socket";
+import { useRegisterShortcuts } from "@/hooks/shortcut";
+import { ShortcutConfig } from "@/hooks/shortcut";
+import { useParams } from "react-router-dom";
 
 interface QuestionProps {
   data: RoomType | null;
 }
 
 const QuestionComponent = ({ data }: QuestionProps) => {
+  const { roomName } = useParams();
+
   const [currentQuestion, setCurrentQuestion] = useState<Question>({
     q: "Loading...",
     a: "",
     type: "",
     value: 0
   });
+
+  const handleStartGame = () => {
+    socket.emit("game:start", { roomName: data?.roomName });
+  };
+
+  const handleBuzz = () => {
+    socket.emit("game:buzz", { roomName: data?.roomName });
+  };
+
+  const handlePauseGame = () => {
+    socket.emit("game:pause", { roomName: data?.roomName });
+  };
+
+  const gameShortcuts = useMemo(
+    (): ShortcutConfig[] => [
+      {
+        key: "p",
+        condition: () => !!roomName && !!socket,
+        action: handlePauseGame,
+        description: "Pause/resume game"
+      },
+      {
+        key: " ",
+        condition: () => !!roomName && !!socket,
+        action: handleBuzz,
+        description: "Buzz"
+      }
+    ],
+    [roomName]
+  );
+
+  useRegisterShortcuts(gameShortcuts, [gameShortcuts, roomName]);
 
   useEffect(() => {
     if (data) {
@@ -28,18 +65,6 @@ const QuestionComponent = ({ data }: QuestionProps) => {
       );
     }
   }, [data]);
-
-  const handleStartGame = () => {
-    socket.emit("game:start", { roomName: data?.roomName });
-  };
-
-  const handleBuzz = () => {
-    socket.emit("game:buzz", { roomName: data?.roomName });
-  };
-
-  const handlePauseGame = () => {
-    socket.emit("game:pause", { roomName: data?.roomName });
-  };
 
   return (
     <div className="flex flex-col gap-4 p-8">

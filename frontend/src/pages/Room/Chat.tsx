@@ -7,7 +7,6 @@ import { Input } from "@/components/ui";
 import socket from "@/lib/socket";
 import { Message, Room as RoomType } from "@/backend/types";
 import { getColorWithOpacity } from "@/lib/utils";
-import { useRegisterCommands } from "@/hooks/command";
 import { useRegisterShortcuts } from "@/hooks/shortcut";
 
 interface ChatProps {
@@ -30,59 +29,55 @@ const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
   }, []);
 
   const focusInput = useCallback(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-    setIsFocused(true);
+    console.log("Focusing input");
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+        try {
+          inputRef.current.setSelectionRange(
+            inputRef.current.value.length,
+            inputRef.current.value.length
+          );
+        } catch (e) {
+          console.log("Selection range error:", e);
+        }
+        setIsFocused(true);
+      }
+    }, 10);
   }, []);
 
   useEffect(() => {
     onFocusChange?.(isFocused);
   }, [isFocused, onFocusChange]);
 
-  const chatCommands = useMemo(
-    () => [
-      {
-        name: "Type in chat",
-        shortcut: "Enter",
-        icon: <Send className="mr-2 h-4 w-4" />,
-        action: focusInput
-      }
-    ],
-    [focusInput]
-  );
-
-  useRegisterCommands("Chat", chatCommands, [chatCommands]);
-
   const sendMessage = useCallback(() => {
     if (!inputMessage) {
       toast.error("Message cannot be empty");
-      unfocusInput();
       return;
     }
 
     socket.emit("chat:send", { roomName, text: inputMessage });
     setInputMessage("");
-    unfocusInput();
   }, [inputMessage, roomName, unfocusInput]);
 
   const chatShortcuts = useMemo(
     () => [
       {
         key: "Enter",
-        action: sendMessage,
-        condition: () => isFocused && !!inputRef.current?.value.trim()
+        action: focusInput,
+        condition: () => !isFocused
       },
       {
         key: "Escape",
         action: unfocusInput,
-        condition: () => isFocused
+        condition: () =>
+          isFocused && inputRef.current === document.activeElement
       }
     ],
-    [sendMessage, unfocusInput, isFocused]
+    [focusInput, unfocusInput, isFocused]
   );
 
-  useRegisterShortcuts("ChatInput", chatShortcuts, [chatShortcuts]);
+  useRegisterShortcuts(chatShortcuts, [focusInput, unfocusInput, isFocused]);
 
   const renderMessageContent = (message: Message) => {
     if (message.tsx) {
@@ -103,13 +98,26 @@ const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
           isFocused ? "Press esc to unfocus" : "Press enter to type"
         }`}
         ref={inputRef}
-        onFocus={() => setIsFocused(true)}
+        onFocus={() => {
+          setIsFocused(true);
+        }}
         onBlur={() => setIsFocused(false)}
         value={inputMessage}
         className="sticky backdrop-blur-sm bg-white/60 border-b border-gray-300 dark:border-gray-700 top-4 left-0"
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           setInputMessage(e.target.value)
         }
+        onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+          console.log("Key pressed:", e.key);
+          if (e.key === "Enter") {
+            e.preventDefault();
+            sendMessage();
+          }
+          if (e.key === "Escape") {
+            e.preventDefault();
+            unfocusInput();
+          }
+        }}
       />
       <div className="mt-4">
         {chat?.map((message: Message, i: number) => {
