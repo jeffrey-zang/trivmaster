@@ -9,7 +9,9 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "dev": "bun run --watch src/index.ts"
+    "start": "bun dist/index.js",
+    "dev": "bun run --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun"
   },
   "type": "module",
   "dependencies": {
