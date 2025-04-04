@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import MetaData from "@/components/MetaData";
 
 import {
   Card,
@@ -28,6 +29,11 @@ const Join = () => {
 
   return (
     <div className="grid place-items-center h-screen">
+      <MetaData
+        title="Join a Room"
+        description="Join a trivia room on Trivmaster"
+      />
+
       <Card className="min-w-96">
         <CardHeader>
           <CardTitle className="text-2xl">Trivmaster</CardTitle>

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import socket from "@/lib/socket";
 import type { ISocket, Room as RoomType } from "@/backend/types";
 import { ShortcutConfig, useRegisterShortcuts } from "@/hooks/shortcut";
+import MetaData from "@/components/MetaData";
 
 import ChatComponent from "./Chat";
 import QuestionComponent from "./Question";
@@ -86,6 +87,11 @@ const Room = () => {
 
   return (
     <div className="flex h-screen">
+      <MetaData
+        title={`Room: ${roomName}`}
+        description={`Join the trivia room ${roomName} on Trivmaster`}
+      />
+
       <div
         className={`w-1/4 min-w-80 dark:bg-gray-900 border-r border-gray-300 dark:border-gray-700 transition-opacity duration-150 ${
           isZenMode ? "opacity-0 pointer-events-none" : "opacity-100"
