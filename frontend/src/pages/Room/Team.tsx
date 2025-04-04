@@ -149,7 +149,6 @@ const TeamComponent = ({
   return (
     <div className="px-8">
       <h2 className="font-semibold mt-4">Teams</h2>
-      {socket.id}
       {Object.entries(teams).map(([teamName, team]: [string, Team]) => (
         <div
           key={`team-${teamName}`}

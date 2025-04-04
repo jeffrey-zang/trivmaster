@@ -16,7 +16,15 @@ export interface Room {
   currentBuzzed?: string;
   currentAnswered: boolean;
   config: RoomConfig;
-  state: "waiting" | "reading" | "buzzing" | "answering";
+  state:
+    | "waiting"
+    | "reading"
+    | "buzzing"
+    | "answering"
+    | "showAnswer"
+    | "gameOver";
+  isPaused?: boolean;
+  teamsAttempted?: string[];
 }
 
 export interface RoomConfig {
