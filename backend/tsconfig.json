@@ -27,7 +27,6 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@/frontend/*": ["../frontend/src/*"]
     }
   }  
 }
