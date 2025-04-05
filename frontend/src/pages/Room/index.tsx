@@ -77,10 +77,10 @@ const Room = () => {
       {
         key: "z",
         action: () => setIsZenMode((prev) => !prev),
-        description: "Toggle zen mode"
-      }
+        description: "Toggle zen mode",
+      },
     ],
-    [setIsZenMode]
+    [setIsZenMode],
   );
 
   useRegisterShortcuts(roomShortcuts, [setIsZenMode]);
@@ -98,7 +98,7 @@ const Room = () => {
         }`}
       >
         <div className="h-1/2 overflow-y-auto relative">
-          <div className="sticky top-0 left-0 p-8 pb-4 border-b border-gray-300 dark:border-gray-700 bg-white">
+          <div className="sticky top-0 left-0 p-8 pb-4 border-b border-gray-300 dark:border-gray-700">
             <h1 className="text-xl">
               Room <span className="font-semibold">{roomName}</span>
             </h1>
