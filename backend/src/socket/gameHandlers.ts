@@ -32,11 +32,10 @@ const pauseManager = {
       return;
 
     const remainingWords = this.wordQueue[roomName].slice(
-      this.lastProcessedIndex[roomName] + 1,
+      this.lastProcessedIndex[roomName] + 1
     );
 
     const { word, delay } = remainingWords[0];
-    console.log(remainingWords[0]);
     if (room.currentQuestion && !this.isPaused[roomName]) {
       room.currentQuestion.q += word + " ";
       io.to(roomName).emit("room:update", room);
@@ -50,7 +49,7 @@ const pauseManager = {
 export const setupGameHandlers = (
   io: Server,
   socket: ISocket,
-  rooms: Record<string, Room>,
+  rooms: Record<string, Room>
 ) => {
   socket.on("game:start", async ({ roomName }: { roomName: string }) => {
     const room = rooms[roomName];
@@ -118,7 +117,7 @@ export const setupGameHandlers = (
     if (!["waiting", "showAnswer"].includes(room.state)) {
       socket.emit(
         "room:error",
-        "Cannot advance to next question in current state",
+        "Cannot advance to next question in current state"
       );
       return;
     }
@@ -211,7 +210,7 @@ export const setupGameHandlers = (
     if (socket.teamName && room.teamsAttempted?.includes(socket.teamName)) {
       socket.emit(
         "room:error",
-        "Your team has already attempted this question",
+        "Your team has already attempted this question"
       );
       return;
     }
@@ -220,7 +219,7 @@ export const setupGameHandlers = (
 
     if (socket.teamName && room.teams[socket.teamName]) {
       const userIndex = room.teams[socket.teamName].members.findIndex(
-        (member) => member.userName === socket.userName,
+        (member) => member.userName === socket.userName
       );
 
       if (userIndex !== -1) {
@@ -260,7 +259,7 @@ export const setupGameHandlers = (
 
       if (socket.teamName && room.teams[socket.teamName]) {
         const userIndex = room.teams[socket.teamName].members.findIndex(
-          (member) => member.userName === socket.userName,
+          (member) => member.userName === socket.userName
         );
 
         if (userIndex !== -1) {
@@ -286,7 +285,7 @@ export const setupGameHandlers = (
             room.currentQuestion?.value || 0;
 
           const userIndex = room.teams[socket.teamName].members.findIndex(
-            (member) => member.userName === socket.userName,
+            (member) => member.userName === socket.userName
           );
 
           if (userIndex !== -1) {
@@ -299,7 +298,7 @@ export const setupGameHandlers = (
         room.state = "waiting";
       } else {
         const teamNames = Object.keys(room.teams).filter(
-          (name) => name !== "Lobby",
+          (name) => name !== "Lobby"
         );
         const allTeamsAttempted =
           teamNames.length > 0 &&
@@ -328,6 +327,6 @@ export const setupGameHandlers = (
       }
 
       io.to(roomName).emit("room:update", room);
-    },
+    }
   );
 };

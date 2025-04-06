@@ -18,8 +18,8 @@ export const setupRoomHandlers = (
           teamName: "Lobby",
           members: [{ userName: userName, points: 0, buzzed: false }],
           points: 0,
-          colour: "#808080"
-        }
+          colour: "#808080",
+        },
       },
       currentQuestion: undefined,
       currentBuzzed: undefined,
@@ -27,9 +27,9 @@ export const setupRoomHandlers = (
       chat: [],
       createdBy: userName,
       config: {
-        readingSpeed: 1
+        readingSpeed: 1,
       },
-      state: "waiting"
+      state: "waiting",
     };
 
     if (createRoom) {
@@ -41,21 +41,19 @@ export const setupRoomHandlers = (
       socket.teamName = "Lobby";
 
       console.log(roomName, "been created by", userName);
-      console.log(
-        `${userName} joined ${roomName} (${socket.id}, ${socket.userName})`
-      );
+      console.log(`${userName} joined ${roomName}`);
 
       rooms[roomName].chat.unshift({
         author: "admin",
         text: `<span><span class="font-bold">${roomName}</span> has been created by ${userName}</span>`,
         timestamp: Date.now(),
-        tsx: true
+        tsx: true,
       });
       rooms[roomName].chat.unshift({
         author: "admin",
         text: `<span>${userName} joined</span>`,
         timestamp: Date.now(),
-        tsx: true
+        tsx: true,
       });
     } else {
       const existingMembers = Object.values(rooms[roomName].teams).flatMap(
@@ -77,7 +75,7 @@ export const setupRoomHandlers = (
         rooms[roomName].teams.Lobby.members.push({
           userName: userName,
           points: 0,
-          buzzed: false
+          buzzed: false,
         });
       }
 
@@ -86,22 +84,18 @@ export const setupRoomHandlers = (
 
       await socket.join(roomName);
 
-      console.log(
-        `${userName} joined ${roomName} (${socket.id}, ${socket.userName})`
-      );
+      console.log(`${userName} joined ${roomName}`);
       rooms[roomName].chat.unshift({
         author: "admin",
         text: `<span>${userName} joined</span>`,
         timestamp: Date.now(),
-        tsx: true
+        tsx: true,
       });
     }
 
-    console.log(socket.id, socket.userName);
-
     socket.emit("room:update", rooms[roomName], {
       userName: userName,
-      teamName: "Lobby"
+      teamName: "Lobby",
     });
 
     socket.to(roomName).emit("room:update", rooms[roomName]);
@@ -135,7 +129,7 @@ export const setupRoomHandlers = (
 
     console.log(socket.userName, "has left", roomName);
 
-    if (Object.keys(rooms[roomName].teams).length === 0) {
+    if (rooms[roomName].teams.Lobby.members.length === 0) {
       delete rooms[roomName];
       console.log(roomName, "has been deleted");
       return;
@@ -145,7 +139,7 @@ export const setupRoomHandlers = (
       author: "admin",
       text: `<span>${socket.userName} has left</span>`,
       timestamp: Date.now(),
-      tsx: true
+      tsx: true,
     });
 
     io.to(roomName).emit("room:update", rooms[roomName]);
