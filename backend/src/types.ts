@@ -14,8 +14,8 @@ export interface Room {
   createdBy: string;
   currentQuestion?: Question;
   currentBuzzed?: string;
-  lastEventTimestamp?: Date;
   currentAnswered: boolean;
+  lastEventTimestamp: number;
   config: RoomConfig;
   state:
     | "waiting"
@@ -30,6 +30,8 @@ export interface Room {
 
 export interface RoomConfig {
   readingSpeed: number; // 0-2, default 1
+  buzzTime: number;
+  answerTime: number;
 }
 
 export interface Message {

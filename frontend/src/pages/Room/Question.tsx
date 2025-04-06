@@ -17,12 +17,13 @@ const QuestionComponent = ({ data }: QuestionProps) => {
   const { roomName } = useParams();
   const answerInputRef = useRef<HTMLInputElement>(null);
   const [answer, setAnswer] = useState("");
+  const [showTimer, setShowTimer] = useState<boolean>(true);
 
   const [currentQuestion, setCurrentQuestion] = useState<Question>({
     q: "Loading...",
     a: "",
     type: "",
-    value: 0
+    value: 0,
   });
 
   const handleStartGame = () => {
@@ -55,19 +56,19 @@ const QuestionComponent = ({ data }: QuestionProps) => {
         key: "p",
         condition: () => !!roomName && !!socket,
         action: handlePauseGame,
-        description: "Pause/resume game"
+        description: "Pause/resume game",
       },
       {
         key: "s",
         condition: () => !!roomName && !!socket && !data?.currentQuestion,
         action: handleStartGame,
-        description: "Start game"
+        description: "Start game",
       },
       {
         key: " ",
         condition: () => !!roomName && !!socket && data?.state !== "buzzing",
         action: handleBuzz,
-        description: "Buzz"
+        description: "Buzz",
       },
       {
         key: "n",
@@ -76,10 +77,10 @@ const QuestionComponent = ({ data }: QuestionProps) => {
           !!socket &&
           (data?.state === "waiting" || data?.state === "showAnswer"),
         action: handleNextQuestion,
-        description: "Next question"
-      }
+        description: "Next question",
+      },
     ],
-    [roomName, data]
+    [roomName, data],
   );
 
   useRegisterShortcuts(gameShortcuts, [gameShortcuts, roomName, data]);
@@ -91,8 +92,8 @@ const QuestionComponent = ({ data }: QuestionProps) => {
           q: "Loading...",
           a: "",
           type: "",
-          value: 0
-        }
+          value: 0,
+        },
       );
     }
   }, [data]);
@@ -227,41 +228,75 @@ const QuestionComponent = ({ data }: QuestionProps) => {
     }
   };
 
-  return (
-    <div className="flex flex-col gap-4 p-8">
-      {data?.state}
-      {data?.currentQuestion ? (
-        <div>
-          <div className="text-sm text-muted-foreground">
-            Question #{data?.questions?.indexOf(currentQuestion) ?? 0 + 1}
-          </div>
-          <div className="text-lg mt-1">
-            {currentQuestion.q}
-            {data.isPaused && (data.state as string) === "reading" && (
-              <span className="ml-2 text-xs text-yellow-500 font-semibold">
-                (Paused)
-              </span>
-            )}
-          </div>
+  useEffect(() => {
+    setShowTimer(false);
+    setTimeout(() => {
+      setShowTimer(true);
+    }, 1);
+  }, [setShowTimer, data, data?.isPaused]);
 
-          {renderQuestionStateUI()}
-        </div>
-      ) : (
-        <div>
-          <p>Game has not started, yet</p>
-          <Button
-            variant="secondary"
-            className="flex items-center gap-2 mt-4"
-            onClick={handleStartGame}
-          >
-            Play
-            <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-              <span className="text-xs">s</span>
-            </kbd>
-          </Button>
-        </div>
-      )}
-    </div>
+  return (
+    <>
+      <div className="h-3">
+        {showTimer ? (
+          <div
+            className={`bg-red-500 h-full animate-[timer_var(--time)_linear_forwards] ${
+              data?.lastEventTimestamp &&
+              ((Date.now() - data?.lastEventTimestamp <
+                (data?.config.answerTime ?? 0) &&
+                data?.state == "reading") ||
+                (Date.now() - data?.lastEventTimestamp <
+                  (data?.config.buzzTime ?? 0) &&
+                  data?.state == "buzzing"))
+                ? "block"
+                : "hidden"
+            } ${data?.isPaused ? "animate-paused" : "animate-running"}`}
+            style={
+              {
+                "--time":
+                  (data?.state == "reading"
+                    ? data?.config.answerTime
+                    : data?.config.buzzTime) + "ms",
+              } as React.CSSProperties
+            }
+          />
+        ) : null}
+      </div>
+      <div className="flex flex-col gap-4 p-8">
+        {data?.state}
+        {data?.currentQuestion ? (
+          <div>
+            <div className="text-sm text-muted-foreground">
+              Question #{data?.questions?.indexOf(currentQuestion) ?? 0 + 1}
+            </div>
+            <div className="text-lg mt-1">
+              {currentQuestion.q}
+              {data.isPaused && (data.state as string) === "reading" && (
+                <span className="ml-2 text-xs text-yellow-500 font-semibold">
+                  (Paused)
+                </span>
+              )}
+            </div>
+
+            {renderQuestionStateUI()}
+          </div>
+        ) : (
+          <div>
+            <p>Game has not started, yet</p>
+            <Button
+              variant="secondary"
+              className="flex items-center gap-2 mt-4"
+              onClick={handleStartGame}
+            >
+              Play
+              <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <span className="text-xs">s</span>
+              </kbd>
+            </Button>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

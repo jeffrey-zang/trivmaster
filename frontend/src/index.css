@@ -123,11 +123,31 @@ body {
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@keyframes timer {
+  0% {
+    width: 100%;
+    background: green;
+  }
+  100% {
+    width: 0;
+    background: red;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .animate-paused {
+    animation-play-state: paused;
+  }
+  .animate-running {
+    animation-play-state: running;
   }
 }

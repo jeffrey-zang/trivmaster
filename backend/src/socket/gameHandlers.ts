@@ -12,12 +12,13 @@ name of Elon Musk's car company?`,
 ];
 
 const pauseManager = {
-  timers: {} as Record<string, NodeJS.Timeout[]>,
+  timer: {} as Record<string, NodeJS.Timeout | null>,
   wordQueue: {} as Record<string, { word: string; delay: number }[]>,
   isPaused: {} as Record<string, boolean>,
   lastProcessedIndex: {} as Record<string, number>,
 
   initRoom(roomName: string) {
+    this.timer[roomName] = null;
     this.wordQueue[roomName] = [];
     this.isPaused[roomName] = false;
     this.lastProcessedIndex[roomName] = -1;
@@ -25,11 +26,25 @@ const pauseManager = {
 
   nextWord(roomName: string, room: Room, io: Server) {
     if (
-      !this.wordQueue[roomName] ||
-      this.isPaused[roomName] ||
-      this.lastProcessedIndex[roomName] + 1 == this.wordQueue[roomName].length
-    )
+      this.lastProcessedIndex[roomName] + 1 ==
+      this.wordQueue[roomName].length
+    ) {
+      room.lastEventTimestamp = Date.now();
+      io.to(roomName).emit("room:update", room);
+      this.timer[roomName] = setTimeout(() => {
+        room.state = "showAnswer";
+        room.chat.unshift({
+          author: "admin",
+          text: `<span>Time! The correct answer was: "${room.currentQuestion?.a}"</span>`,
+          timestamp: Date.now(),
+          tsx: true,
+        });
+        io.to(roomName).emit("room:update", room);
+      }, room.config.buzzTime);
       return;
+    }
+
+    if (!this.wordQueue[roomName] || this.isPaused[roomName]) return;
 
     const remainingWords = this.wordQueue[roomName].slice(
       this.lastProcessedIndex[roomName] + 1
@@ -42,7 +57,10 @@ const pauseManager = {
       this.lastProcessedIndex[roomName] = this.lastProcessedIndex[roomName] + 1;
     }
 
-    setTimeout(() => this.nextWord(roomName, room, io), delay * 100);
+    this.timer[roomName] = setTimeout(
+      () => this.nextWord(roomName, room, io),
+      delay * 100,
+    );
   },
 };
 
@@ -185,6 +203,8 @@ export const setupGameHandlers = (
       console.log("Game resumed");
     } else {
       pauseManager.isPaused[roomName] = true;
+      const buzzTimer = pauseManager.timer[roomName];
+      if (buzzTimer) clearTimeout(buzzTimer);
       console.log("Game paused");
     }
 
@@ -215,6 +235,15 @@ export const setupGameHandlers = (
       return;
     }
 
+    if (Date.now() - room.lastEventTimestamp > room.config.buzzTime) {
+      socket.emit("room:error", "Timed out before reaching the server");
+      console.log(Date.now() - room.lastEventTimestamp);
+      return;
+    }
+
+    if (pauseManager.timer[roomName])
+      clearTimeout(pauseManager.timer[roomName]);
+
     pauseManager.isPaused[roomName] = true;
 
     if (socket.teamName && room.teams[socket.teamName]) {
@@ -234,6 +263,45 @@ export const setupGameHandlers = (
 
     room.currentBuzzed = socket.id;
     room.state = "buzzing";
+    room.lastEventTimestamp = Date.now();
+
+    pauseManager.timer[roomName] = setTimeout(() => {
+      room.chat.unshift({
+        author: "admin",
+        text: `<span>${socket.userName} took too long to answer</span>`,
+        timestamp: Date.now(),
+        tsx: true,
+      });
+
+      const teamNames = Object.keys(room.teams).filter(
+        (name) => name !== "Lobby",
+      );
+      const allTeamsAttempted =
+        teamNames.length > 0 &&
+        teamNames.every((team) => room.teamsAttempted?.includes(team));
+
+      if (allTeamsAttempted || teamNames.length <= 1) {
+        room.state = "showAnswer";
+        room.chat.unshift({
+          author: "admin",
+          text: `<span>The correct answer was: "${room.currentQuestion?.a}"</span>`,
+          timestamp: Date.now(),
+          tsx: true,
+        });
+      } else {
+        room.currentBuzzed = undefined;
+        room.state = "reading";
+
+        setTimeout(() => {
+          if (roomName in rooms) {
+            pauseManager.isPaused[roomName] = false;
+            pauseManager.nextWord(roomName, room, io);
+            io.to(roomName).emit("room:update", room);
+          }
+        }, 1500);
+      }
+      io.to(roomName).emit("room:update", room);
+    }, room.config.answerTime);
     io.to(roomName).emit("room:update", room);
   });
 
@@ -256,6 +324,14 @@ export const setupGameHandlers = (
         socket.emit("room:error", "You are not the current buzzer");
         return;
       }
+
+      if (Date.now() - room.lastEventTimestamp > room.config.answerTime) {
+        socket.emit("room:error", "Timed out before reaching the server");
+        return;
+      }
+
+      if (pauseManager.timer[roomName])
+        clearTimeout(pauseManager.timer[roomName]);
 
       if (socket.teamName && room.teams[socket.teamName]) {
         const userIndex = room.teams[socket.teamName].members.findIndex(
