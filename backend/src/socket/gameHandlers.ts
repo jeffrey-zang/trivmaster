@@ -235,9 +235,12 @@ export const setupGameHandlers = (
       return;
     }
 
-    if (Date.now() - room.lastEventTimestamp > room.config.buzzTime) {
+    if (
+      Date.now() - room.lastEventTimestamp > room.config.buzzTime &&
+      pauseManager.lastProcessedIndex[roomName] + 1 ==
+        pauseManager.wordQueue[roomName].length
+    ) {
       socket.emit("room:error", "Timed out before reaching the server");
-      console.log(Date.now() - room.lastEventTimestamp);
       return;
     }
 
