@@ -7,8 +7,8 @@ const allQuestions = [
 name of Elon Musk's car company?`,
     a: "Tesla",
     type: "blitz",
-    value: 10
-  }
+    value: 10,
+  },
 ];
 
 const pauseManager = {
@@ -17,50 +17,40 @@ const pauseManager = {
   isPaused: {} as Record<string, boolean>,
   lastProcessedIndex: {} as Record<string, number>,
 
-  clearTimers(roomName: string) {
-    if (this.timers[roomName]) {
-      this.timers[roomName].forEach((timer) => clearTimeout(timer));
-      this.timers[roomName] = [];
-    }
-  },
-
   initRoom(roomName: string) {
-    this.timers[roomName] = [];
     this.wordQueue[roomName] = [];
     this.isPaused[roomName] = false;
     this.lastProcessedIndex[roomName] = -1;
   },
 
-  processWords(roomName: string, room: Room, io: Server) {
-    if (!this.wordQueue[roomName] || this.isPaused[roomName]) return;
+  nextWord(roomName: string, room: Room, io: Server) {
+    if (
+      !this.wordQueue[roomName] ||
+      this.isPaused[roomName] ||
+      this.lastProcessedIndex[roomName] + 1 == this.wordQueue[roomName].length
+    )
+      return;
 
     const remainingWords = this.wordQueue[roomName].slice(
-      this.lastProcessedIndex[roomName] + 1
+      this.lastProcessedIndex[roomName] + 1,
     );
 
-    let cumulativeDelay = 0;
-    remainingWords.forEach((item, index) => {
-      const { word, delay } = item;
-      cumulativeDelay += delay;
+    const { word, delay } = remainingWords[0];
+    console.log(remainingWords[0]);
+    if (room.currentQuestion && !this.isPaused[roomName]) {
+      room.currentQuestion.q += word + " ";
+      io.to(roomName).emit("room:update", room);
+      this.lastProcessedIndex[roomName] = this.lastProcessedIndex[roomName] + 1;
+    }
 
-      const timer = setTimeout(() => {
-        if (room.currentQuestion && !this.isPaused[roomName]) {
-          room.currentQuestion.q += word + " ";
-          io.to(roomName).emit("room:update", room);
-          this.lastProcessedIndex[roomName] =
-            this.lastProcessedIndex[roomName] + 1;
-        }
-      }, cumulativeDelay * 100);
-
-      this.timers[roomName].push(timer);
-    });
-  }
+    setTimeout(() => this.nextWord(roomName, room, io), delay * 100);
+  },
 };
 
 export const setupGameHandlers = (
   io: Server,
   socket: ISocket,
-  rooms: Record<string, Room>
+  rooms: Record<string, Room>,
 ) => {
   socket.on("game:start", async ({ roomName }: { roomName: string }) => {
     const room = rooms[roomName];
@@ -76,7 +66,7 @@ export const setupGameHandlers = (
       q: "",
       a: "",
       type: "",
-      value: 0
+      value: 0,
     };
     room.currentBuzzed = undefined;
     room.currentAnswered = false;
@@ -105,13 +95,13 @@ export const setupGameHandlers = (
       pauseManager.wordQueue[roomName].push({ word, delay: wordDelay });
     });
 
-    pauseManager.processWords(roomName, room, io);
+    pauseManager.nextWord(roomName, room, io);
 
     room.currentQuestion = {
       q: room.currentQuestion.q,
       a: question.a,
       type: question.type,
-      value: question.value
+      value: question.value,
     };
 
     io.to(roomName).emit("room:update", room);
@@ -128,7 +118,7 @@ export const setupGameHandlers = (
     if (!["waiting", "showAnswer"].includes(room.state)) {
       socket.emit(
         "room:error",
-        "Cannot advance to next question in current state"
+        "Cannot advance to next question in current state",
       );
       return;
     }
@@ -161,11 +151,11 @@ export const setupGameHandlers = (
           wordDelay = wordDelay * room.config.readingSpeed;
           pauseManager.wordQueue[roomName].push({
             word,
-            delay: wordDelay
+            delay: wordDelay,
           });
         });
 
-        pauseManager.processWords(roomName, room, io);
+        pauseManager.nextWord(roomName, room, io);
 
         io.to(roomName).emit("room:update", room);
       }
@@ -192,18 +182,16 @@ export const setupGameHandlers = (
 
     if (pauseManager.isPaused[roomName]) {
       pauseManager.isPaused[roomName] = false;
-      pauseManager.clearTimers(roomName);
-      pauseManager.processWords(roomName, room, io);
+      pauseManager.nextWord(roomName, room, io);
       console.log("Game resumed");
     } else {
       pauseManager.isPaused[roomName] = true;
-      pauseManager.clearTimers(roomName);
       console.log("Game paused");
     }
 
     io.to(roomName).emit("room:update", {
       ...room,
-      isPaused: pauseManager.isPaused[roomName]
+      isPaused: pauseManager.isPaused[roomName],
     });
   });
 
@@ -223,17 +211,16 @@ export const setupGameHandlers = (
     if (socket.teamName && room.teamsAttempted?.includes(socket.teamName)) {
       socket.emit(
         "room:error",
-        "Your team has already attempted this question"
+        "Your team has already attempted this question",
       );
       return;
     }
 
     pauseManager.isPaused[roomName] = true;
-    pauseManager.clearTimers(roomName);
 
     if (socket.teamName && room.teams[socket.teamName]) {
       const userIndex = room.teams[socket.teamName].members.findIndex(
-        (member) => member.userName === socket.userName
+        (member) => member.userName === socket.userName,
       );
 
       if (userIndex !== -1) {
@@ -273,7 +260,7 @@ export const setupGameHandlers = (
 
       if (socket.teamName && room.teams[socket.teamName]) {
         const userIndex = room.teams[socket.teamName].members.findIndex(
-          (member) => member.userName === socket.userName
+          (member) => member.userName === socket.userName,
         );
 
         if (userIndex !== -1) {
@@ -290,7 +277,7 @@ export const setupGameHandlers = (
           isCorrect ? "Correct!" : "Incorrect!"
         }</span>`,
         timestamp: Date.now(),
-        tsx: true
+        tsx: true,
       });
 
       if (isCorrect) {
@@ -299,7 +286,7 @@ export const setupGameHandlers = (
             room.currentQuestion?.value || 0;
 
           const userIndex = room.teams[socket.teamName].members.findIndex(
-            (member) => member.userName === socket.userName
+            (member) => member.userName === socket.userName,
           );
 
           if (userIndex !== -1) {
@@ -312,7 +299,7 @@ export const setupGameHandlers = (
         room.state = "waiting";
       } else {
         const teamNames = Object.keys(room.teams).filter(
-          (name) => name !== "Lobby"
+          (name) => name !== "Lobby",
         );
         const allTeamsAttempted =
           teamNames.length > 0 &&
@@ -324,7 +311,7 @@ export const setupGameHandlers = (
             author: "admin",
             text: `<span>The correct answer was: "${room.currentQuestion?.a}"</span>`,
             timestamp: Date.now(),
-            tsx: true
+            tsx: true,
           });
         } else {
           room.currentBuzzed = undefined;
@@ -333,7 +320,7 @@ export const setupGameHandlers = (
           setTimeout(() => {
             if (roomName in rooms) {
               pauseManager.isPaused[roomName] = false;
-              pauseManager.processWords(roomName, room, io);
+              pauseManager.nextWord(roomName, room, io);
               io.to(roomName).emit("room:update", room);
             }
           }, 1500);
@@ -341,6 +328,6 @@ export const setupGameHandlers = (
       }
 
       io.to(roomName).emit("room:update", room);
-    }
+    },
   );
 };

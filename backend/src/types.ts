@@ -14,6 +14,7 @@ export interface Room {
   createdBy: string;
   currentQuestion?: Question;
   currentBuzzed?: string;
+  lastEventTimestamp?: Date;
   currentAnswered: boolean;
   config: RoomConfig;
   state:
