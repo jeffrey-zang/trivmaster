@@ -349,7 +349,7 @@ export const setupGameHandlers = (
       const isCorrect =
         room.currentQuestion?.a.toLowerCase() === answer.toLowerCase();
 
-      room.chat.unshift({
+      room.system.unshift({
         author: "admin",
         text: `<span>${socket.userName} answered: "${answer}" - ${
           isCorrect ? "Correct!" : "Incorrect!"
@@ -385,7 +385,7 @@ export const setupGameHandlers = (
 
         if (allTeamsAttempted || teamNames.length <= 1) {
           room.state = "showAnswer";
-          room.chat.unshift({
+          room.system.unshift({
             author: "admin",
             text: `<span>The correct answer was: "${room.currentQuestion?.a}"</span>`,
             timestamp: Date.now(),

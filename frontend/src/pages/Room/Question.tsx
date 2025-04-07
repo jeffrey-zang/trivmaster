@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, FormEvent } from "react";
 
-import { Room as RoomType, Question } from "@/backend/types";
+import { Room as RoomType, Question, Message } from "@/backend/types";
 import { Button } from "@/components/ui/button";
 import socket from "@/lib/socket";
 import { useRegisterShortcuts } from "@/hooks/shortcut";
@@ -8,10 +8,21 @@ import { ShortcutConfig } from "@/hooks/shortcut";
 import { useParams } from "react-router-dom";
 import { Pause, Play, ArrowRight, CheckCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
-
+import DOMPurify from "dompurify";
 interface QuestionProps {
   data: RoomType | null;
 }
+
+const renderMessageContent = (message: Message) => {
+  if (message.tsx) {
+    return (
+      <div
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.text) }}
+      />
+    );
+  }
+  return <>{message.text}</>;
+};
 
 const QuestionComponent = ({ data }: QuestionProps) => {
   const { roomName } = useParams();
@@ -80,7 +91,7 @@ const QuestionComponent = ({ data }: QuestionProps) => {
         description: "Next question",
       },
     ],
-    [roomName, data],
+    [roomName, data]
   );
 
   useRegisterShortcuts(gameShortcuts, [gameShortcuts, roomName, data]);
@@ -93,7 +104,7 @@ const QuestionComponent = ({ data }: QuestionProps) => {
           a: "",
           type: "",
           value: 0,
-        },
+        }
       );
     }
   }, [data]);
@@ -103,6 +114,8 @@ const QuestionComponent = ({ data }: QuestionProps) => {
       answerInputRef.current.focus();
     }
   }, [data?.state]);
+
+  console.log(data?.system);
 
   // Show the correct team in the given state
   const renderQuestionStateUI = () => {
@@ -295,6 +308,16 @@ const QuestionComponent = ({ data }: QuestionProps) => {
             </Button>
           </div>
         )}
+      </div>
+      <div className="mt-4">
+        {data?.system.map((message: Message, index: number) => (
+          <div
+            key={`system-${index}`}
+            className="text-sm text-muted-foreground"
+          >
+            {renderMessageContent(message)}
+          </div>
+        ))}
       </div>
     </>
   );

@@ -4,7 +4,7 @@ import { ISocket, Room, Team, Member } from "../types.ts";
 export const setupRoomHandlers = (
   io: Server,
   socket: ISocket,
-  rooms: Record<string, Room>,
+  rooms: Record<string, Room>
 ) => {
   socket.on("room:join", async ({ roomName }: { roomName: string }) => {
     const createRoom = !(roomName in rooms);
@@ -25,6 +25,7 @@ export const setupRoomHandlers = (
       currentBuzzed: undefined,
       currentAnswered: false,
       chat: [],
+      system: [],
       createdBy: userName,
       lastEventTimestamp: 0,
       config: {
@@ -45,16 +46,16 @@ export const setupRoomHandlers = (
 
       console.log(roomName, "been created by", userName);
       console.log(
-        `${userName} joined ${roomName} (${socket.id}, ${socket.userName})`,
+        `${userName} joined ${roomName} (${socket.id}, ${socket.userName})`
       );
 
-      rooms[roomName].chat.unshift({
+      rooms[roomName].system.unshift({
         author: "admin",
         text: `<span><span class="font-bold">${roomName}</span> has been created by ${userName}</span>`,
         timestamp: Date.now(),
         tsx: true,
       });
-      rooms[roomName].chat.unshift({
+      rooms[roomName].system.unshift({
         author: "admin",
         text: `<span>${userName} joined</span>`,
         timestamp: Date.now(),
@@ -62,10 +63,10 @@ export const setupRoomHandlers = (
       });
     } else {
       const existingMembers = Object.values(rooms[roomName].teams).flatMap(
-        (team: Team) => team.members,
+        (team: Team) => team.members
       );
       const existingMemberNames = existingMembers.map(
-        (member: Member) => member.userName,
+        (member: Member) => member.userName
       );
 
       let i = 1;
@@ -89,10 +90,8 @@ export const setupRoomHandlers = (
 
       await socket.join(roomName);
 
-      console.log(
-        `${userName} joined ${roomName} (${socket.id}, ${socket.userName})`,
-      );
-      rooms[roomName].chat.unshift({
+      console.log(`${userName} joined ${roomName}`);
+      rooms[roomName].system.unshift({
         author: "admin",
         text: `<span>${userName} joined</span>`,
         timestamp: Date.now(),
@@ -142,7 +141,7 @@ export const setupRoomHandlers = (
       return;
     }
 
-    rooms[roomName].chat.unshift({
+    rooms[roomName].system.unshift({
       author: "admin",
       text: `<span>${socket.userName} has left</span>`,
       timestamp: Date.now(),

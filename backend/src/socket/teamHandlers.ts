@@ -21,7 +21,7 @@ const colours = [
   "pink",
   "rose",
   "gray",
-  "slate"
+  "slate",
 ];
 
 export const setupTeamHandlers = (
@@ -34,7 +34,7 @@ export const setupTeamHandlers = (
     ({
       roomName,
       teamName,
-      userName
+      userName,
     }: {
       roomName: string;
       teamName: string;
@@ -56,35 +56,35 @@ export const setupTeamHandlers = (
         teamName: teamName,
         members: [{ userName: userName, points: 0, buzzed: false }],
         points: 0,
-        colour: teamColour
+        colour: teamColour,
       };
 
       console.log("Team added:", rooms[roomName].teams);
 
       socket.teamName = teamName;
 
-      rooms[roomName].chat.unshift({
+      rooms[roomName].system.unshift({
         author: "admin",
         text: `<span>${userName} added a team: <span class="font-semibold" style="background-color: ${getColorWithOpacity(
           teamColour
         )}">${teamName}</span></span>`,
         timestamp: Date.now(),
-        tsx: true
+        tsx: true,
       });
-      rooms[roomName].chat.unshift({
+      rooms[roomName].system.unshift({
         author: "admin",
         text: `<span>${userName} joined <span class="font-semibold" style="background-color: ${getColorWithOpacity(
           teamColour
         )}">${teamName}</span></span>`,
         timestamp: Date.now(),
-        tsx: true
+        tsx: true,
       });
       console.log(userName, "added a team:", teamName);
       console.log(userName, "joined team:", teamName);
 
       io.to(roomName).emit("room:update", rooms[roomName], {
         userName: userName,
-        teamName: teamName
+        teamName: teamName,
       });
     }
   );
@@ -94,7 +94,7 @@ export const setupTeamHandlers = (
     ({
       roomName,
       teamName,
-      userName
+      userName,
     }: {
       roomName: string;
       teamName: string;
@@ -117,24 +117,24 @@ export const setupTeamHandlers = (
       rooms[roomName].teams[teamName].members.push({
         userName: userName,
         points: 0,
-        buzzed: false
+        buzzed: false,
       });
 
       socket.teamName = teamName;
 
       const teamColour = rooms[roomName].teams[teamName].colour;
 
-      rooms[roomName].chat.unshift({
+      rooms[roomName].system.unshift({
         author: "admin",
         text: `<span>${userName} joined <span class="bg-${teamColour}-100 font-semibold">${teamName}</span></span>`,
         timestamp: Date.now(),
-        tsx: true
+        tsx: true,
       });
       console.log(userName, "joined team:", teamName);
 
       io.to(roomName).emit("room:update", rooms[roomName], {
         userName: userName,
-        teamName: teamName
+        teamName: teamName,
       });
     }
   );

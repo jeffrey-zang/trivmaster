@@ -1,5 +1,4 @@
 import { useRef, useState, useCallback, useEffect, useMemo } from "react";
-import DOMPurify from "dompurify";
 import { toast } from "sonner";
 
 import { Input } from "@/components/ui";
@@ -55,30 +54,19 @@ const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
       {
         key: "Enter",
         action: focusInput,
-        condition: () => !isFocused
+        condition: () => !isFocused,
       },
       {
         key: "Escape",
         action: unfocusInput,
         condition: () =>
-          isFocused && inputRef.current === document.activeElement
-      }
+          isFocused && inputRef.current === document.activeElement,
+      },
     ],
     [focusInput, unfocusInput, isFocused]
   );
 
   useRegisterShortcuts(chatShortcuts, [focusInput, unfocusInput, isFocused]);
-
-  const renderMessageContent = (message: Message) => {
-    if (message.tsx) {
-      return (
-        <div
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.text) }}
-        />
-      );
-    }
-    return <>{message.text}</>;
-  };
 
   return (
     <div className="border-t border-gray-300 pb-8 dark:border-gray-700 px-8">
@@ -112,26 +100,18 @@ const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
         {chat?.map((message: Message, i: number) => {
           return (
             <div key={`chat-${i}`}>
-              {message.author === "admin" && (
-                <div className="text-sm text-gray-500">
-                  {renderMessageContent(message)}
-                </div>
-              )}
-              {message.author !== "admin" && (
-                <div className="text-sm">
-                  <span
-                    className={`font-bold mr-2`}
-                    style={{
-                      backgroundColor: getColorWithOpacity(
-                        data?.teams[message.team || ""]?.colour || "gray"
-                      )
-                    }}
-                  >
-                    {message.author}
-                  </span>
-                  {renderMessageContent(message)}
-                </div>
-              )}
+              <div className="text-sm">
+                <span
+                  className={`font-bold mr-2`}
+                  style={{
+                    backgroundColor: getColorWithOpacity(
+                      data?.teams[message.team || ""]?.colour || "gray"
+                    ),
+                  }}
+                >
+                  {message.author}
+                </span>
+              </div>
             </div>
           );
         })}
