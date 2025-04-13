@@ -58,9 +58,6 @@ export const setupTeamHandlers = (
         points: 0,
         colour: teamColour,
       };
-
-      console.log("Team added:", rooms[roomName].teams);
-
       socket.teamName = teamName;
 
       rooms[roomName].system.unshift({

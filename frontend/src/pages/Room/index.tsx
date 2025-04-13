@@ -80,7 +80,7 @@ const Room = () => {
         description: "Toggle zen mode",
       },
     ],
-    [setIsZenMode],
+    [setIsZenMode]
   );
 
   useRegisterShortcuts(roomShortcuts, [setIsZenMode]);
@@ -130,7 +130,7 @@ const Room = () => {
       </div>
 
       <div className="w-4/5">
-        <QuestionComponent data={data} />
+        <QuestionComponent data={data} userName={member?.userName} />
       </div>
 
       <div ref={blurTargetRef} tabIndex={-1} style={{ outline: "none" }} />

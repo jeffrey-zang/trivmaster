@@ -45,9 +45,7 @@ export const setupRoomHandlers = (
       socket.teamName = "Lobby";
 
       console.log(roomName, "been created by", userName);
-      console.log(
-        `${userName} joined ${roomName} (${socket.id}, ${socket.userName})`
-      );
+      console.log(`${userName} joined ${roomName}`);
 
       rooms[roomName].system.unshift({
         author: "admin",

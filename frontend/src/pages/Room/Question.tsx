@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import DOMPurify from "dompurify";
 interface QuestionProps {
   data: RoomType | null;
+  userName: string | undefined;
 }
 
 const renderMessageContent = (message: Message) => {
@@ -24,7 +25,7 @@ const renderMessageContent = (message: Message) => {
   return <>{message.text}</>;
 };
 
-const QuestionComponent = ({ data }: QuestionProps) => {
+const QuestionComponent = ({ data, userName }: QuestionProps) => {
   const { roomName } = useParams();
   const answerInputRef = useRef<HTMLInputElement>(null);
   const [answer, setAnswer] = useState("");
@@ -38,11 +39,11 @@ const QuestionComponent = ({ data }: QuestionProps) => {
   });
 
   const handleStartGame = () => {
-    socket.emit("game:start", { roomName: data?.roomName });
+    socket.emit("game:start", { roomName: data?.roomName, userName: userName });
   };
 
   const handleBuzz = () => {
-    socket.emit("game:buzz", { roomName: data?.roomName });
+    socket.emit("game:buzz", { roomName: data?.roomName, userName: userName });
   };
 
   const handlePauseGame = () => {
@@ -50,7 +51,7 @@ const QuestionComponent = ({ data }: QuestionProps) => {
   };
 
   const handleNextQuestion = () => {
-    socket.emit("game:next", { roomName: data?.roomName });
+    socket.emit("game:next", { roomName: data?.roomName, userName: userName });
   };
 
   const handleSubmitAnswer = (e: FormEvent) => {
@@ -309,7 +310,7 @@ const QuestionComponent = ({ data }: QuestionProps) => {
           </div>
         )}
       </div>
-      <div className="mt-4">
+      <div className="mt-4 px-8">
         {data?.system.map((message: Message, index: number) => (
           <div
             key={`system-${index}`}

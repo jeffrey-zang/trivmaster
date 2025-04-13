@@ -59,7 +59,7 @@ const pauseManager = {
 
     this.timer[roomName] = setTimeout(
       () => this.nextWord(roomName, room, io),
-      delay * 100,
+      delay * 100
     );
   },
 };
@@ -69,118 +69,149 @@ export const setupGameHandlers = (
   socket: ISocket,
   rooms: Record<string, Room>
 ) => {
-  socket.on("game:start", async ({ roomName }: { roomName: string }) => {
-    const room = rooms[roomName];
+  socket.on(
+    "game:start",
+    async ({ roomName, userName }: { roomName: string; userName: string }) => {
+      const room = rooms[roomName];
 
-    console.log("Starting game");
+      console.log("Attempting to start game in Room " + roomName);
 
-    if (!room) {
-      socket.emit("room:error", "Room not found");
-      return;
-    }
-
-    room.currentQuestion = {
-      q: "",
-      a: "",
-      type: "",
-      value: 0,
-    };
-    room.currentBuzzed = undefined;
-    room.currentAnswered = false;
-    room.state = "reading";
-    room.teamsAttempted = [];
-
-    pauseManager.initRoom(roomName);
-
-    const question =
-      allQuestions[Math.floor(Math.random() * allQuestions.length)];
-
-    const words = question.q.split(" ");
-    words.forEach((word) => {
-      let wordDelay = Math.log(word.length) + 1;
+      if (!room) {
+        socket.emit("room:error", "Room not found");
+        console.log("Error, Room " + roomName + " was not found");
+        return;
+      }
 
       if (
-        word.endsWith(".") ||
-        word.endsWith(",") ||
-        word.endsWith("!") ||
-        word.endsWith("?")
+        room.teams["Lobby"].members.filter(
+          (member) => member.userName === userName
+        ).length !== 0
       ) {
-        wordDelay += 1;
+        socket.emit("room:error", "Lobby members cannot start games");
+        console.log("A Lobby member attempted to start a game in " + roomName);
+        return;
       }
 
-      wordDelay = wordDelay * room.config.readingSpeed;
-      pauseManager.wordQueue[roomName].push({ word, delay: wordDelay });
-    });
+      room.currentQuestion = {
+        q: "",
+        a: "",
+        type: "",
+        value: 0,
+      };
+      room.currentBuzzed = undefined;
+      room.currentAnswered = false;
+      room.state = "reading";
+      room.teamsAttempted = [];
 
-    pauseManager.nextWord(roomName, room, io);
+      pauseManager.initRoom(roomName);
 
-    room.currentQuestion = {
-      q: room.currentQuestion.q,
-      a: question.a,
-      type: question.type,
-      value: question.value,
-    };
+      const question =
+        allQuestions[Math.floor(Math.random() * allQuestions.length)];
 
-    io.to(roomName).emit("room:update", room);
-  });
+      const words = question.q.split(" ");
+      words.forEach((word) => {
+        let wordDelay = Math.log(word.length) + 1;
 
-  socket.on("game:next", ({ roomName }: { roomName: string }) => {
-    const room = rooms[roomName];
+        if (
+          word.endsWith(".") ||
+          word.endsWith(",") ||
+          word.endsWith("!") ||
+          word.endsWith("?")
+        ) {
+          wordDelay += 1;
+        }
 
-    if (!room) {
-      socket.emit("room:error", "Room not found");
-      return;
-    }
+        wordDelay = wordDelay * room.config.readingSpeed;
+        pauseManager.wordQueue[roomName].push({ word, delay: wordDelay });
+      });
 
-    if (!["waiting", "showAnswer"].includes(room.state)) {
-      socket.emit(
-        "room:error",
-        "Cannot advance to next question in current state"
-      );
-      return;
-    }
+      pauseManager.nextWord(roomName, room, io);
 
-    if (room.questions.length > 0) {
-      const nextQuestion = room.questions.shift();
+      room.currentQuestion = {
+        q: room.currentQuestion.q,
+        a: question.a,
+        type: question.type,
+        value: question.value,
+      };
 
-      if (nextQuestion) {
-        room.currentQuestion = nextQuestion;
-        room.currentBuzzed = undefined;
-        room.currentAnswered = false;
-        room.state = "reading";
-        room.teamsAttempted = [];
+      rooms[roomName].system.unshift({
+        author: "admin",
+        text: `<span>${userName} started the game</span>`,
+        timestamp: Date.now(),
+        tsx: true,
+      });
 
-        pauseManager.initRoom(roomName);
-
-        const words = nextQuestion.q.split(" ");
-        words.forEach((word) => {
-          let wordDelay = Math.log(word.length) + 1;
-
-          if (
-            word.endsWith(".") ||
-            word.endsWith(",") ||
-            word.endsWith("!") ||
-            word.endsWith("?")
-          ) {
-            wordDelay += 1;
-          }
-
-          wordDelay = wordDelay * room.config.readingSpeed;
-          pauseManager.wordQueue[roomName].push({
-            word,
-            delay: wordDelay,
-          });
-        });
-
-        pauseManager.nextWord(roomName, room, io);
-
-        io.to(roomName).emit("room:update", room);
-      }
-    } else {
-      room.state = "gameOver";
       io.to(roomName).emit("room:update", room);
     }
-  });
+  );
+
+  socket.on(
+    "game:next",
+    ({ roomName, userName }: { roomName: string; userName: string }) => {
+      const room = rooms[roomName];
+
+      if (!room) {
+        socket.emit("room:error", "Room not found");
+        return;
+      }
+
+      if (!["waiting", "showAnswer"].includes(room.state)) {
+        socket.emit(
+          "room:error",
+          "Cannot advance to next question in current state"
+        );
+        return;
+      }
+
+      if (room.questions.length > 0) {
+        const nextQuestion = room.questions.shift();
+
+        if (nextQuestion) {
+          room.currentQuestion = nextQuestion;
+          room.currentBuzzed = undefined;
+          room.currentAnswered = false;
+          room.state = "reading";
+          room.teamsAttempted = [];
+
+          pauseManager.initRoom(roomName);
+
+          const words = nextQuestion.q.split(" ");
+          words.forEach((word) => {
+            let wordDelay = Math.log(word.length) + 1;
+
+            if (
+              word.endsWith(".") ||
+              word.endsWith(",") ||
+              word.endsWith("!") ||
+              word.endsWith("?")
+            ) {
+              wordDelay += 1;
+            }
+
+            wordDelay = wordDelay * room.config.readingSpeed;
+            pauseManager.wordQueue[roomName].push({
+              word,
+              delay: wordDelay,
+            });
+          });
+
+          pauseManager.nextWord(roomName, room, io);
+
+          rooms[roomName].system.unshift({
+            author: "admin",
+            text: `<span>${userName} began the next question</span>`,
+            timestamp: Date.now(),
+            tsx: true,
+          });
+
+          io.to(roomName).emit("room:update", room);
+        }
+      } else {
+        room.state = "gameOver";
+        io.to(roomName).emit("room:update", room);
+      }
+    }
+  );
 
   socket.on("game:pause", ({ roomName }: { roomName: string }) => {
     const room = rooms[roomName];
@@ -277,7 +308,7 @@ export const setupGameHandlers = (
       });
 
       const teamNames = Object.keys(room.teams).filter(
-        (name) => name !== "Lobby",
+        (name) => name !== "Lobby"
       );
       const allTeamsAttempted =
         teamNames.length > 0 &&
