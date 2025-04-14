@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import { ISocket, Room } from "../types.ts";
+import { getColorWithOpacity } from "@/utils.ts";
 
 const allQuestions = [
   {
@@ -134,9 +135,22 @@ export const setupGameHandlers = (
         value: question.value,
       };
 
+      let teamColour: string = "";
+      Object.keys(room.teams).map((t) => {
+        const f = room.teams[t].members.filter(
+          (member) => member.userName === userName
+        );
+
+        if (f.length !== 0) {
+          teamColour = room.teams[t].colour;
+        }
+      });
+
       rooms[roomName].system.unshift({
         author: "admin",
-        text: `<span>${userName} started the game</span>`,
+        text: `<span><span class="font-semibold" style="background-color: ${getColorWithOpacity(
+          teamColour
+        )}">${userName}</span> started the game</span>`,
         timestamp: Date.now(),
         tsx: true,
       });
@@ -212,9 +226,22 @@ export const setupGameHandlers = (
 
           pauseManager.nextWord(roomName, room, io);
 
+          let teamColour: string = "";
+          Object.keys(room.teams).map((t) => {
+            const f = room.teams[t].members.filter(
+              (member) => member.userName === userName
+            );
+
+            if (f.length !== 0) {
+              teamColour = room.teams[t].colour;
+            }
+          });
+
           rooms[roomName].system.unshift({
             author: "admin",
-            text: `<span>${userName} began the next question</span>`,
+            text: `<span><span class="font-semibold" style="background-color: ${getColorWithOpacity(
+              teamColour
+            )}">${userName}</span> began the next question</span>`,
             timestamp: Date.now(),
             tsx: true,
           });
@@ -259,11 +286,51 @@ export const setupGameHandlers = (
         pauseManager.isPaused[roomName] = false;
         pauseManager.nextWord(roomName, room, io);
         console.log("Game resumed");
+
+        let teamColour: string = "";
+        Object.keys(room.teams).map((t) => {
+          const f = room.teams[t].members.filter(
+            (member) => member.userName === userName
+          );
+
+          if (f.length !== 0) {
+            teamColour = room.teams[t].colour;
+          }
+        });
+
+        rooms[roomName].system.unshift({
+          author: "admin",
+          text: `<span><span class="font-semibold" style="background-color: ${getColorWithOpacity(
+            teamColour
+          )}">${userName}</span> resumed the game</span>`,
+          timestamp: Date.now(),
+          tsx: true,
+        });
       } else {
         pauseManager.isPaused[roomName] = true;
         const buzzTimer = pauseManager.timer[roomName];
         if (buzzTimer) clearTimeout(buzzTimer);
         console.log("Game paused");
+
+        let teamColour: string = "";
+        Object.keys(room.teams).map((t) => {
+          const f = room.teams[t].members.filter(
+            (member) => member.userName === userName
+          );
+
+          if (f.length !== 0) {
+            teamColour = room.teams[t].colour;
+          }
+        });
+
+        rooms[roomName].system.unshift({
+          author: "admin",
+          text: `<span><span class="font-semibold" style="background-color: ${getColorWithOpacity(
+            teamColour
+          )}">${userName}</span> paused the game</span>`,
+          timestamp: Date.now(),
+          tsx: true,
+        });
       }
 
       io.to(roomName).emit("room:update", {
@@ -320,6 +387,17 @@ export const setupGameHandlers = (
 
       pauseManager.isPaused[roomName] = true;
 
+      let teamColour: string = "";
+      Object.keys(room.teams).map((t) => {
+        const f = room.teams[t].members.filter(
+          (member) => member.userName === userName
+        );
+
+        if (f.length !== 0) {
+          teamColour = room.teams[t].colour;
+        }
+      });
+
       if (socket.teamName && room.teams[socket.teamName]) {
         const userIndex = room.teams[socket.teamName].members.findIndex(
           (member) => member.userName === socket.userName
@@ -327,6 +405,15 @@ export const setupGameHandlers = (
 
         if (userIndex !== -1) {
           room.teams[socket.teamName].members[userIndex].buzzed = true;
+
+          rooms[roomName].system.unshift({
+            author: "admin",
+            text: `<span><span class="font-semibold" style="background-color: ${getColorWithOpacity(
+              teamColour
+            )}">${userName}</span> buzzed!</span>`,
+            timestamp: Date.now(),
+            tsx: true,
+          });
         }
 
         if (!room.teamsAttempted) {
@@ -340,9 +427,11 @@ export const setupGameHandlers = (
       room.lastEventTimestamp = Date.now();
 
       pauseManager.timer[roomName] = setTimeout(() => {
-        room.chat.unshift({
+        rooms[roomName].system.unshift({
           author: "admin",
-          text: `<span>${socket.userName} took too long to answer</span>`,
+          text: `<span><span class="font-semibold" style="background-color: ${getColorWithOpacity(
+            teamColour
+          )}">${userName}</span> took too long to answer</span>`,
           timestamp: Date.now(),
           tsx: true,
         });
@@ -421,9 +510,22 @@ export const setupGameHandlers = (
       const isCorrect =
         room.currentQuestion?.a.toLowerCase() === answer.toLowerCase();
 
+      let teamColour: string = "";
+      Object.keys(room.teams).map((t) => {
+        const f = room.teams[t].members.filter(
+          (member) => member.userName === socket.userName
+        );
+
+        if (f.length !== 0) {
+          teamColour = room.teams[t].colour;
+        }
+      });
+
       room.system.unshift({
         author: "admin",
-        text: `<span>${socket.userName} answered: "${answer}" - ${
+        text: `<span><span class="font-semibold" style="background-color: ${getColorWithOpacity(
+          teamColour
+        )}">${socket.userName}</span>  answered: "${answer}" - ${
           isCorrect ? "Correct!" : "Incorrect!"
         }</span>`,
         timestamp: Date.now(),
