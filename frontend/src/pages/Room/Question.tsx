@@ -47,7 +47,7 @@ const QuestionComponent = ({ data, userName }: QuestionProps) => {
   };
 
   const handlePauseGame = () => {
-    socket.emit("game:pause", { roomName: data?.roomName });
+    socket.emit("game:pause", { roomName: data?.roomName, userName: userName });
   };
 
   const handleNextQuestion = () => {

@@ -163,6 +163,21 @@ export const setupGameHandlers = (
         return;
       }
 
+      if (
+        room.teams["Lobby"].members.filter(
+          (member) => member.userName === userName
+        ).length !== 0
+      ) {
+        socket.emit(
+          "room:error",
+          "Lobby members cannot advance to next question"
+        );
+        console.log(
+          "A Lobby member attempted to advance to next question in " + roomName
+        );
+        return;
+      }
+
       if (room.questions.length > 0) {
         const nextQuestion = room.questions.shift();
 
@@ -213,131 +228,157 @@ export const setupGameHandlers = (
     }
   );
 
-  socket.on("game:pause", ({ roomName }: { roomName: string }) => {
-    const room = rooms[roomName];
+  socket.on(
+    "game:pause",
+    ({ roomName, userName }: { roomName: string; userName: string }) => {
+      const room = rooms[roomName];
 
-    console.log("Pausing game");
+      console.log("Pausing game");
 
-    if (!room) {
-      socket.emit("room:error", "Room not found");
-      return;
-    }
-
-    if (room.state !== "reading") {
-      socket.emit("room:error", "Game not in reading state");
-      return;
-    }
-
-    if (pauseManager.isPaused[roomName]) {
-      pauseManager.isPaused[roomName] = false;
-      pauseManager.nextWord(roomName, room, io);
-      console.log("Game resumed");
-    } else {
-      pauseManager.isPaused[roomName] = true;
-      const buzzTimer = pauseManager.timer[roomName];
-      if (buzzTimer) clearTimeout(buzzTimer);
-      console.log("Game paused");
-    }
-
-    io.to(roomName).emit("room:update", {
-      ...room,
-      isPaused: pauseManager.isPaused[roomName],
-    });
-  });
-
-  socket.on("game:buzz", ({ roomName }: { roomName: string }) => {
-    const room = rooms[roomName];
-
-    if (!room) {
-      socket.emit("room:error", "Room not found");
-      return;
-    }
-
-    if (room.state !== "reading") {
-      socket.emit("room:error", "Game not in reading state");
-      return;
-    }
-
-    if (socket.teamName && room.teamsAttempted?.includes(socket.teamName)) {
-      socket.emit(
-        "room:error",
-        "Your team has already attempted this question"
-      );
-      return;
-    }
-
-    if (
-      Date.now() - room.lastEventTimestamp > room.config.buzzTime &&
-      pauseManager.lastProcessedIndex[roomName] + 1 ==
-        pauseManager.wordQueue[roomName].length
-    ) {
-      socket.emit("room:error", "Timed out before reaching the server");
-      return;
-    }
-
-    if (pauseManager.timer[roomName])
-      clearTimeout(pauseManager.timer[roomName]);
-
-    pauseManager.isPaused[roomName] = true;
-
-    if (socket.teamName && room.teams[socket.teamName]) {
-      const userIndex = room.teams[socket.teamName].members.findIndex(
-        (member) => member.userName === socket.userName
-      );
-
-      if (userIndex !== -1) {
-        room.teams[socket.teamName].members[userIndex].buzzed = true;
+      if (!room) {
+        socket.emit("room:error", "Room not found");
+        return;
       }
 
-      if (!room.teamsAttempted) {
-        room.teamsAttempted = [];
+      if (room.state !== "reading") {
+        socket.emit("room:error", "Game not in reading state");
+        return;
       }
-      room.teamsAttempted.push(socket.teamName);
-    }
 
-    room.currentBuzzed = socket.id;
-    room.state = "buzzing";
-    room.lastEventTimestamp = Date.now();
+      if (
+        room.teams["Lobby"].members.filter(
+          (member) => member.userName === userName
+        ).length !== 0
+      ) {
+        socket.emit("room:error", "Lobby members cannot pause");
+        console.log("A Lobby member attempted to pause in " + roomName);
+        return;
+      }
 
-    pauseManager.timer[roomName] = setTimeout(() => {
-      room.chat.unshift({
-        author: "admin",
-        text: `<span>${socket.userName} took too long to answer</span>`,
-        timestamp: Date.now(),
-        tsx: true,
+      if (pauseManager.isPaused[roomName]) {
+        pauseManager.isPaused[roomName] = false;
+        pauseManager.nextWord(roomName, room, io);
+        console.log("Game resumed");
+      } else {
+        pauseManager.isPaused[roomName] = true;
+        const buzzTimer = pauseManager.timer[roomName];
+        if (buzzTimer) clearTimeout(buzzTimer);
+        console.log("Game paused");
+      }
+
+      io.to(roomName).emit("room:update", {
+        ...room,
+        isPaused: pauseManager.isPaused[roomName],
       });
+    }
+  );
 
-      const teamNames = Object.keys(room.teams).filter(
-        (name) => name !== "Lobby"
-      );
-      const allTeamsAttempted =
-        teamNames.length > 0 &&
-        teamNames.every((team) => room.teamsAttempted?.includes(team));
+  socket.on(
+    "game:buzz",
+    ({ roomName, userName }: { roomName: string; userName: string }) => {
+      const room = rooms[roomName];
 
-      if (allTeamsAttempted || teamNames.length <= 1) {
-        room.state = "showAnswer";
+      if (!room) {
+        socket.emit("room:error", "Room not found");
+        return;
+      }
+
+      if (room.state !== "reading") {
+        socket.emit("room:error", "Game not in reading state");
+        return;
+      }
+
+      if (
+        room.teams["Lobby"].members.filter(
+          (member) => member.userName === userName
+        ).length !== 0
+      ) {
+        socket.emit("room:error", "Lobby members cannot buzz");
+        console.log("A Lobby member attempted to buzz in " + roomName);
+        return;
+      }
+
+      if (socket.teamName && room.teamsAttempted?.includes(socket.teamName)) {
+        socket.emit(
+          "room:error",
+          "Your team has already attempted this question"
+        );
+        return;
+      }
+
+      if (
+        Date.now() - room.lastEventTimestamp > room.config.buzzTime &&
+        pauseManager.lastProcessedIndex[roomName] + 1 ==
+          pauseManager.wordQueue[roomName].length
+      ) {
+        socket.emit("room:error", "Timed out before reaching the server");
+        return;
+      }
+
+      if (pauseManager.timer[roomName])
+        clearTimeout(pauseManager.timer[roomName]);
+
+      pauseManager.isPaused[roomName] = true;
+
+      if (socket.teamName && room.teams[socket.teamName]) {
+        const userIndex = room.teams[socket.teamName].members.findIndex(
+          (member) => member.userName === socket.userName
+        );
+
+        if (userIndex !== -1) {
+          room.teams[socket.teamName].members[userIndex].buzzed = true;
+        }
+
+        if (!room.teamsAttempted) {
+          room.teamsAttempted = [];
+        }
+        room.teamsAttempted.push(socket.teamName);
+      }
+
+      room.currentBuzzed = socket.id;
+      room.state = "buzzing";
+      room.lastEventTimestamp = Date.now();
+
+      pauseManager.timer[roomName] = setTimeout(() => {
         room.chat.unshift({
           author: "admin",
-          text: `<span>The correct answer was: "${room.currentQuestion?.a}"</span>`,
+          text: `<span>${socket.userName} took too long to answer</span>`,
           timestamp: Date.now(),
           tsx: true,
         });
-      } else {
-        room.currentBuzzed = undefined;
-        room.state = "reading";
 
-        setTimeout(() => {
-          if (roomName in rooms) {
-            pauseManager.isPaused[roomName] = false;
-            pauseManager.nextWord(roomName, room, io);
-            io.to(roomName).emit("room:update", room);
-          }
-        }, 1500);
-      }
+        const teamNames = Object.keys(room.teams).filter(
+          (name) => name !== "Lobby"
+        );
+        const allTeamsAttempted =
+          teamNames.length > 0 &&
+          teamNames.every((team) => room.teamsAttempted?.includes(team));
+
+        if (allTeamsAttempted || teamNames.length <= 1) {
+          room.state = "showAnswer";
+          room.chat.unshift({
+            author: "admin",
+            text: `<span>The correct answer was: "${room.currentQuestion?.a}"</span>`,
+            timestamp: Date.now(),
+            tsx: true,
+          });
+        } else {
+          room.currentBuzzed = undefined;
+          room.state = "reading";
+
+          setTimeout(() => {
+            if (roomName in rooms) {
+              pauseManager.isPaused[roomName] = false;
+              pauseManager.nextWord(roomName, room, io);
+              io.to(roomName).emit("room:update", room);
+            }
+          }, 1500);
+        }
+        io.to(roomName).emit("room:update", room);
+      }, room.config.answerTime);
       io.to(roomName).emit("room:update", room);
-    }, room.config.answerTime);
-    io.to(roomName).emit("room:update", room);
-  });
+    }
+  );
 
   socket.on(
     "game:answer",
