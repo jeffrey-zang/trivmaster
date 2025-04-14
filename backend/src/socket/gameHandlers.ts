@@ -256,6 +256,52 @@ export const setupGameHandlers = (
   );
 
   socket.on(
+    "game:clear",
+    ({ roomName, userName }: { roomName: string; userName: string }) => {
+      const room = rooms[roomName];
+
+      console.log("Clearing game");
+
+      if (!room) {
+        socket.emit("room:error", "Room not found");
+        return;
+      }
+
+      room.questions = [];
+      room.system = [];
+
+      Object.keys(room.teams).map((team) => {
+        room.teams[team].points = 0;
+        room.teams[team].members.map((member) => {
+          member.points = 0;
+        });
+      });
+
+      let teamColour: string = "";
+      Object.keys(room.teams).map((t) => {
+        const f = room.teams[t].members.filter(
+          (member) => member.userName === userName
+        );
+
+        if (f.length !== 0) {
+          teamColour = room.teams[t].colour;
+        }
+      });
+
+      rooms[roomName].system.unshift({
+        author: "admin",
+        text: `<span><span class="font-semibold" style="background-color: ${getColorWithOpacity(
+          teamColour
+        )}">${userName}</span> cleared the room</span>`,
+        timestamp: Date.now(),
+        tsx: true,
+      });
+
+      io.to(roomName).emit("room:update", room);
+    }
+  );
+
+  socket.on(
     "game:pause",
     ({ roomName, userName }: { roomName: string; userName: string }) => {
       const room = rooms[roomName];

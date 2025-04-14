@@ -54,6 +54,10 @@ const QuestionComponent = ({ data, userName }: QuestionProps) => {
     socket.emit("game:next", { roomName: data?.roomName, userName: userName });
   };
 
+  const handleClear = () => {
+    socket.emit("game:clear", { roomName: data?.roomName, userName: userName });
+  };
+
   const handleSubmitAnswer = (e: FormEvent) => {
     e.preventDefault();
     if (answer.trim()) {
@@ -200,6 +204,9 @@ const QuestionComponent = ({ data, userName }: QuestionProps) => {
           <p className="text-sm text-muted-foreground">
             No more questions available.
           </p>
+          <Button onClick={handleClear} variant="secondary" className="mt-4">
+            Clear questions and restart
+          </Button>
         </div>
       );
     } else {
