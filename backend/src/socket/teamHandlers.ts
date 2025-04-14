@@ -79,10 +79,7 @@ export const setupTeamHandlers = (
       console.log(userName, "added a team:", teamName);
       console.log(userName, "joined team:", teamName);
 
-      io.to(roomName).emit("room:update", rooms[roomName], {
-        userName: userName,
-        teamName: teamName,
-      });
+      io.to(roomName).emit("room:update", rooms[roomName]);
     }
   );
 

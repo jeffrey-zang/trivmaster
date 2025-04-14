@@ -284,7 +284,6 @@ const QuestionComponent = ({ data, userName }: QuestionProps) => {
         ) : null}
       </div>
       <div className="flex flex-col gap-4 p-8">
-        {data?.state}
         {data?.currentQuestion ? (
           <div>
             <div className="text-sm text-muted-foreground">

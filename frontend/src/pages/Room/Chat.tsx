@@ -111,6 +111,7 @@ const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
                 >
                   {message.author}
                 </span>
+                <span>{message.text}</span>
               </div>
             </div>
           );

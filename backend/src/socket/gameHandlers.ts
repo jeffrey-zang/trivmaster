@@ -34,7 +34,7 @@ const pauseManager = {
       io.to(roomName).emit("room:update", room);
       this.timer[roomName] = setTimeout(() => {
         room.state = "showAnswer";
-        room.chat.unshift({
+        room.system.unshift({
           author: "admin",
           text: `<span>Time! The correct answer was: "${room.currentQuestion?.a}"</span>`,
           timestamp: Date.now(),
@@ -491,7 +491,7 @@ export const setupGameHandlers = (
 
         if (allTeamsAttempted || teamNames.length <= 1) {
           room.state = "showAnswer";
-          room.chat.unshift({
+          room.system.unshift({
             author: "admin",
             text: `<span>The correct answer was: "${room.currentQuestion?.a}"</span>`,
             timestamp: Date.now(),
