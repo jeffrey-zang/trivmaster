@@ -52,6 +52,12 @@ export const setupTeamHandlers = (
 
       const teamColour = colours[Math.floor(Math.random() * colours.length)];
 
+      for (let i = 0; i < rooms[roomName].chat.length; i++) {
+        if (rooms[roomName].chat[i].author === userName) {
+          rooms[roomName].chat[i].team = teamName;
+        }
+      }
+
       rooms[roomName].teams[teamName] = {
         teamName: teamName,
         members: [{ userName: userName, points: 0, buzzed: false }],

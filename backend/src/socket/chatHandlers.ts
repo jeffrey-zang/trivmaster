@@ -22,7 +22,6 @@ export const setupChatHandlers = (
 
       rooms[roomName].chat.unshift({
         author: socket.userName,
-        team: socket.teamName,
         text: text,
         timestamp: Date.now(),
         tsx: false, // Regular chat messages don't use TSX by default

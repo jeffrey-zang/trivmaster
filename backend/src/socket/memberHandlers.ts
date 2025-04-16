@@ -34,6 +34,13 @@ export const setupMemberHandlers = (
       if (room.createdBy === socket.userName) {
         room.createdBy = newUserName;
       }
+
+      for (let i = 0; i < room.chat.length; i++) {
+        const message = room.chat[i];
+        if (message.author === oldUserName) {
+          message.author = newUserName;
+        }
+      }
       member.userName = newUserName;
       socket.userName = newUserName;
 
