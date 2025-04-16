@@ -287,7 +287,7 @@ const QuestionComponent = ({ data, userName }: QuestionProps) => {
         {data?.currentQuestion ? (
           <div>
             <div className="text-sm text-muted-foreground">
-              Question #{data?.questions?.indexOf(currentQuestion) ?? 0 + 1}
+              Question #{data?.questions.length + 1}
             </div>
             <div className="text-lg mt-1">
               {currentQuestion.q}

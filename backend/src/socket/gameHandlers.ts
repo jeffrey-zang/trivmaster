@@ -268,12 +268,7 @@ export const setupGameHandlers = (
       }
 
       room.questions = [];
-      room.currentQuestion = {
-        q: "",
-        a: "",
-        type: "",
-        value: 0,
-      };
+      room.currentQuestion = undefined;
       room.system = [];
       room.teamsAttempted = [];
       room.state = "waiting";
