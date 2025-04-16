@@ -268,7 +268,15 @@ export const setupGameHandlers = (
       }
 
       room.questions = [];
+      room.currentQuestion = {
+        q: "",
+        a: "",
+        type: "",
+        value: 0,
+      };
       room.system = [];
+      room.teamsAttempted = [];
+      room.state = "waiting";
 
       Object.keys(room.teams).map((team) => {
         room.teams[team].points = 0;
@@ -296,6 +304,8 @@ export const setupGameHandlers = (
         timestamp: Date.now(),
         tsx: true,
       });
+
+      console.log(room);
 
       io.to(roomName).emit("room:update", room);
     }
