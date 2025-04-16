@@ -12,7 +12,11 @@ import {
   DialogTitle,
   DialogFooter,
   Label,
-  Input
+  Input,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from "@/components/ui";
 import { Team, Member } from "@/backend/types";
 import { getColorWithOpacity } from "@/lib/utils";
@@ -34,9 +38,11 @@ const TeamComponent = ({
   userName,
   socket,
   currentBuzzed,
-  currentTeam
+  currentTeam,
 }: TeamProps) => {
   const [teamName, setTeamName] = useState<string>("");
+  const [rename, setRename] = useState<string | undefined>(userName);
+  const [renaming, setRenaming] = useState<boolean>(false);
   const [selectedTeam, setSelectedTeam] = useState<string>("");
   const [activeDialog, setActiveDialog] = useState<DialogType>(null);
 
@@ -51,7 +57,7 @@ const TeamComponent = ({
     socket.emit("team:add", {
       roomName,
       teamName: teamName,
-      userName
+      userName,
     });
     setTeamName("");
     setActiveDialog(null);
@@ -61,7 +67,7 @@ const TeamComponent = ({
     socket.emit("team:join", {
       roomName,
       teamName: selectedTeam,
-      userName
+      userName,
     });
     toast.success(`You have joined ${selectedTeam}`);
     setSelectedTeam("");
@@ -154,7 +160,7 @@ const TeamComponent = ({
           key={`team-${teamName}`}
           className={`mt-2 border border-gray-200 dark:border-gray-700 p-2 rounded-lg hover:opacity-80 transition-opacity duration-150`}
           style={{
-            backgroundColor: getColorWithOpacity(team.colour)
+            backgroundColor: getColorWithOpacity(team.colour),
           }}
           onClick={() => {
             if (team.teamName === currentTeam) {
@@ -184,7 +190,51 @@ const TeamComponent = ({
                 }`}
               >
                 <span className="flex items-center text-xs">
-                  {member.userName}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <button
+                          onClick={() => {
+                            setRenaming(true);
+                          }}
+                          className={`${renaming ? "hidden" : "block"}`}
+                        >
+                          {member.userName}
+                        </button>
+                        <form
+                          className={`${renaming ? "block" : "hidden"} w-min`}
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            if (rename === "") {
+                              toast.error("Name cannot be empty");
+                              return;
+                            }
+                            socket.emit("member:rename", {
+                              roomName,
+                              oldUserName: member.userName,
+                              newUserName: rename,
+                            });
+                            setRenaming(false);
+                            setRename("");
+                          }}
+                        >
+                          <input
+                            type="text"
+                            value={rename}
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) => {
+                              setRename(e.target.value);
+                            }}
+                          ></input>
+                        </form>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Rename</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
                   {member.userName === userName && (
                     <span className="text-xs inline-flex h-5 select-none items-center gap-2 rounded border bg-muted p-0.5 leading-none ml-1 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
                       you

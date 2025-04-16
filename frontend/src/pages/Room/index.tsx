@@ -1,11 +1,17 @@
 import { toast } from "sonner";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import socket from "@/lib/socket";
 import type { ISocket, Room as RoomType } from "@/backend/types";
 import { ShortcutConfig, useRegisterShortcuts } from "@/hooks/shortcut";
 import MetaData from "@/components/MetaData";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui";
 
 import ChatComponent from "./Chat";
 import QuestionComponent from "./Question";
@@ -99,9 +105,20 @@ const Room = () => {
       >
         <div className="h-1/2 overflow-y-auto relative">
           <div className="sticky top-0 left-0 p-8 pb-4 border-b border-gray-300 dark:border-gray-700">
-            <h1 className="text-xl">
-              Room <span className="font-semibold">{roomName}</span>
-            </h1>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  {" "}
+                  <Link className="text-xl" to="/">
+                    Room <span className="font-semibold">{roomName}</span>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Back to home</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
             <p className="text-xs text-muted-foreground">
               Created by{" "}
               <span className="font-semibold">{data?.createdBy}</span>

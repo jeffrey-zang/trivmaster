@@ -97,25 +97,32 @@ const ChatComponent = ({ roomName, chat, onFocusChange, data }: ChatProps) => {
         }}
       />
       <div className="mt-4">
-        {chat?.map((message: Message, i: number) => {
-          return (
-            <div key={`chat-${i}`}>
-              <div className="text-sm">
-                <span
-                  className={`font-bold mr-2`}
-                  style={{
-                    backgroundColor: getColorWithOpacity(
-                      data?.teams[message.team || ""]?.colour || "gray"
-                    ),
-                  }}
-                >
-                  {message.author}
-                </span>
-                <span>{message.text}</span>
-              </div>
-            </div>
-          );
-        })}
+        {chat.length === 0 ? (
+          <span className="text-xs text-foreground">No messages yet</span>
+        ) : (
+          <div>
+            {" "}
+            {chat?.map((message: Message, i: number) => {
+              return (
+                <div key={`chat-${i}`}>
+                  <div className="text-sm">
+                    <span
+                      className={`font-bold mr-2`}
+                      style={{
+                        backgroundColor: getColorWithOpacity(
+                          data?.teams[message.team || ""]?.colour || "gray"
+                        ),
+                      }}
+                    >
+                      {message.author}
+                    </span>
+                    <span>{message.text}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
