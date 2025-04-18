@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { ISocket, Room, Team, Member } from "../types.ts";
+import { ISocket, Room, Team, Member } from "./types.ts";
 
 export const setupMemberHandlers = (
   io: Server,

@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { ISocket, Room } from "@/types.ts";
+import { ISocket, Room } from "@/socket/types.ts";
 import { setupRoomHandlers } from "./roomHandlers.ts";
 import { setupChatHandlers } from "./chatHandlers.ts";
 import { setupTeamHandlers } from "./teamHandlers.ts";
