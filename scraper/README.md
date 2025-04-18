@@ -25,3 +25,5 @@ pip -r requirements.txt
 ## Functionality
 
 Put pdfs in `/pdfs`. Results will be saved as JSON in `/results`. These are gitignored because I don't want to push all of our packs to GitHub.
+
+You can use the `storage.py` script to store all of the pack data (from `/results`) in Supabase.
