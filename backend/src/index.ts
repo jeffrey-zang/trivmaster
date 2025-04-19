@@ -22,6 +22,7 @@ const io = new Server(server, {
 });
 
 const output = await fetchAndReconstruct();
+export const allQuestions = JSON.parse(output);
 
 setupSocketIO(io);
 

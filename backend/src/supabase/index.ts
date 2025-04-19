@@ -1,6 +1,13 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import * as dotenv from "dotenv";
-import { PackRow, SectionRow, QuestionRow, OutputPack } from "./types.ts";
+import {
+  PackRow,
+  SectionRow,
+  QuestionRow,
+  OutputPack,
+  AnswerRow,
+} from "./types.ts";
+import { Answer } from "@/socket/types";
 
 dotenv.config();
 
@@ -53,11 +60,13 @@ export async function fetchAndReconstruct(): Promise<string> {
         question: q.question,
         prompt: q.question_prompts.map((p) => p.prompt),
         reject: q.question_rejects.map((r) => r.term),
-        answers: (q.answers || []).map((a) => ({
-          text: a.answer_text,
-          required: a.answer_required_terms.map((rt) => rt.term),
-          optional: a.answer_optional_terms.map((ot) => ot.term),
-        })),
+        answers: (q.answers || []).map(
+          (a: AnswerRow): Answer => ({
+            text: a.answer_text,
+            required: a.answer_required_terms.map((rt) => rt.term),
+            optional: a.answer_optional_terms.map((ot) => ot.term),
+          })
+        ),
       })),
     })),
   }));

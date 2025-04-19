@@ -1,3 +1,5 @@
+import { Answer } from "@/socket/types";
+
 export interface AnswerRequiredTerm {
   term: string;
 }
@@ -40,17 +42,12 @@ export interface PackRow {
   sections: SectionRow[];
 }
 
-export interface OutputAnswer {
-  text: string;
-  required: string[];
-  optional: string[];
-}
 export interface OutputQuestion {
   number: number;
   question: string;
   prompt: string[];
   reject: string[];
-  answers: OutputAnswer[];
+  answers: Answer[];
 }
 export interface OutputSection {
   title: string;

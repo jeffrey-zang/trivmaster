@@ -58,7 +58,13 @@ export interface Member {
 
 export type Question = {
   q: string;
-  a: string;
+  a: Answer[];
   type?: string;
   value?: number;
+};
+
+export type Answer = {
+  text: string;
+  required: string[];
+  optional: string[];
 };

@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { ISocket, Room, Team, Member } from "@/socket/types.ts";
-import { getColorWithOpacity } from "../utils.ts";
+import { getColorWithOpacity } from "@/utils/getColorWithOpacity.ts";
 
 const colours = [
   "red",

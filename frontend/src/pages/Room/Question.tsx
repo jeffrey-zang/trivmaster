@@ -1,6 +1,12 @@
 import { useState, useEffect, useMemo, useRef, FormEvent } from "react";
 
-import { Room as RoomType, Question, Message } from "@/backend/types";
+import {
+  Room as RoomType,
+  Question,
+  Message,
+  Team,
+  Member,
+} from "@/backend/types";
 import { Button } from "@/components/ui/button";
 import socket from "@/lib/socket";
 import { useRegisterShortcuts } from "@/hooks/shortcut";
@@ -33,7 +39,7 @@ const QuestionComponent = ({ data, userName }: QuestionProps) => {
 
   const [currentQuestion, setCurrentQuestion] = useState<Question>({
     q: "Loading...",
-    a: "",
+    a: [],
     type: "",
     value: 0,
   });
@@ -106,7 +112,7 @@ const QuestionComponent = ({ data, userName }: QuestionProps) => {
       setCurrentQuestion(
         data.currentQuestion || {
           q: "Loading...",
-          a: "",
+          a: [],
           type: "",
           value: 0,
         }
@@ -151,8 +157,9 @@ const QuestionComponent = ({ data, userName }: QuestionProps) => {
         <div className="mt-4">
           <p className="text-sm text-yellow-500 font-medium">
             {Object.values(data.teams)
-              .flatMap((team) => team.members)
-              .find((member) => member.buzzed)?.userName || "Someone"}{" "}
+              .flatMap((team: Team) => team.members)
+              .find((member: Member) => member.buzzed)?.userName ||
+              "Someone"}{" "}
             is answering...
           </p>
         </div>
@@ -183,7 +190,9 @@ const QuestionComponent = ({ data, userName }: QuestionProps) => {
         <div className="mt-4">
           <p className="text-sm font-medium mb-2">
             The correct answer was:{" "}
-            <span className="text-primary">{currentQuestion.a}</span>
+            <span className="text-primary">
+              {currentQuestion.a.map((a) => a.text).join(" OR ")}
+            </span>
           </p>
           <Button
             onClick={handleNextQuestion}

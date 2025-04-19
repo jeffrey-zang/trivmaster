@@ -16,7 +16,7 @@ export const getColorWithOpacity = (colorName: string): string => {
     sky: "135, 206, 235",
     violet: "238, 130, 238",
     fuchsia: "255, 0, 255",
-    rose: "255, 0, 127"
+    rose: "255, 0, 127",
   };
 
   const rgbValue = colorMap[colorName.toLowerCase()] || "0, 0, 0";

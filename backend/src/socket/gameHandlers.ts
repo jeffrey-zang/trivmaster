@@ -1,16 +1,14 @@
 import { Server } from "socket.io";
-import { ISocket, Room } from "./types.ts";
-import { getColorWithOpacity } from "@/utils.ts";
-
-const allQuestions = [
-  {
-    q: `What word is a unit of measurement for magnetic field strength and is also the
-name of Elon Musk's car company?`,
-    a: "Tesla",
-    type: "blitz",
-    value: 10,
-  },
-];
+import { Answer, ISocket, Room } from "./types.ts";
+import { getColorWithOpacity } from "@/utils/getColorWithOpacity.ts";
+import { allQuestions } from "../index.ts";
+import {
+  AnswerRow,
+  PackRow,
+  QuestionRow,
+  SectionRow,
+} from "@/supabase/types.ts";
+import { validateAnswer } from "@/utils/validateAnswer.ts";
 
 const pauseManager = {
   timer: {} as Record<string, NodeJS.Timeout | null>,
@@ -36,7 +34,9 @@ const pauseManager = {
         room.state = "showAnswer";
         room.system.unshift({
           author: "admin",
-          text: `<span>Time! The correct answer was: "${room.currentQuestion?.a}"</span>`,
+          text: `<span>Time! The correct answer was: <span class="font-semibold">${room.currentQuestion?.a
+            .map((a) => a.text)
+            .join(" OR ")}</span></span>`,
           timestamp: Date.now(),
           tsx: true,
         });
@@ -95,7 +95,7 @@ export const setupGameHandlers = (
 
       room.currentQuestion = {
         q: "",
-        a: "",
+        a: [],
         type: "",
         value: 0,
       };
@@ -106,10 +106,20 @@ export const setupGameHandlers = (
 
       pauseManager.initRoom(roomName);
 
-      const question =
+      const pack: PackRow =
         allQuestions[Math.floor(Math.random() * allQuestions.length)];
 
-      const words = question.q.split(" ");
+      let section: SectionRow =
+        pack.sections[Math.floor(Math.random() * pack.sections.length)];
+      while (section.title === "Jackpot" || section.title === "Streak") {
+        section =
+          pack.sections[Math.floor(Math.random() * pack.sections.length)];
+      }
+
+      const question: QuestionRow =
+        section.questions[Math.floor(Math.random() * section.questions.length)];
+
+      const words = question.question.split(" ");
       words.forEach((word) => {
         let wordDelay = Math.log(word.length) + 1;
 
@@ -128,11 +138,10 @@ export const setupGameHandlers = (
 
       pauseManager.nextWord(roomName, room, io);
 
+      console.log(question.answers);
       room.currentQuestion = {
         q: room.currentQuestion.q,
-        a: question.a,
-        type: question.type,
-        value: question.value,
+        a: question.answers.map((answer: any) => answer),
       };
 
       let teamColour: string = "";
@@ -299,8 +308,6 @@ export const setupGameHandlers = (
         timestamp: Date.now(),
         tsx: true,
       });
-
-      console.log(room);
 
       io.to(roomName).emit("room:update", room);
     }
@@ -498,7 +505,9 @@ export const setupGameHandlers = (
           room.state = "showAnswer";
           room.system.unshift({
             author: "admin",
-            text: `<span>The correct answer was: "${room.currentQuestion?.a}"</span>`,
+            text: `<span>The correct answer was: <span class="font-semibold">${room.currentQuestion?.a
+              .map((a) => a.text)
+              .join(" OR ")}</span></span>`,
             timestamp: Date.now(),
             tsx: true,
           });
@@ -558,8 +567,9 @@ export const setupGameHandlers = (
         }
       }
 
-      const isCorrect =
-        room.currentQuestion?.a.toLowerCase() === answer.toLowerCase();
+      let isCorrect: boolean = validateAnswer(answer, {
+        answers: room.currentQuestion?.a || [],
+      });
 
       let teamColour: string = "";
       Object.keys(room.teams).map((t) => {
@@ -612,7 +622,9 @@ export const setupGameHandlers = (
           room.state = "showAnswer";
           room.system.unshift({
             author: "admin",
-            text: `<span>The correct answer was: "${room.currentQuestion?.a}"</span>`,
+            text: `<span>The correct answer was: <span class="font-semibold">${room.currentQuestion?.a
+              .map((a) => a.text)
+              .join(" OR ")}</span></span>`,
             timestamp: Date.now(),
             tsx: true,
           });
