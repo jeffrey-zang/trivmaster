@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
-import { ISocket, Room, Team, Member } from "./types.ts";
-
+import { ISocket, Room, Member } from "./types.ts";
+import { getColorWithOpacity } from "@/utils/getColorWithOpacity.ts";
 export const setupMemberHandlers = (
   io: Server,
   socket: ISocket,
@@ -45,6 +45,28 @@ export const setupMemberHandlers = (
       socket.userName = newUserName;
 
       console.log("User renamed from", oldUserName, "to", newUserName);
+
+      let teamColour: string = "";
+      Object.keys(room.teams).map((t) => {
+        const f = room.teams[t].members.filter(
+          (member) => member.userName === socket.userName
+        );
+
+        if (f.length !== 0) {
+          teamColour = room.teams[t].colour;
+        }
+      });
+
+      room.system.unshift({
+        author: "admin",
+        text: `<span><span class="font-semibold" style="background-color: ${getColorWithOpacity(
+          teamColour
+        )}">${oldUserName}</span> renamed themselves to <span class="font-semibold" style="background-color: ${getColorWithOpacity(
+          teamColour
+        )}">${socket.userName}</span></span>`,
+        timestamp: Date.now(),
+        tsx: true,
+      });
 
       io.to(roomName).emit("room:update", room, {
         userName: newUserName,
