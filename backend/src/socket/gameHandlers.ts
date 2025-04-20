@@ -138,11 +138,16 @@ export const setupGameHandlers = (
 
       pauseManager.nextWord(roomName, room, io);
 
-      console.log(question.answers);
       room.currentQuestion = {
         q: room.currentQuestion.q,
         a: question.answers.map((answer: any) => answer),
       };
+      room.questions = [
+        {
+          q: room.currentQuestion.q,
+          a: question.answers.map((answer: any) => answer),
+        },
+      ];
 
       let teamColour: string = "";
       Object.keys(room.teams).map((t) => {
@@ -173,8 +178,10 @@ export const setupGameHandlers = (
     ({ roomName, userName }: { roomName: string; userName: string }) => {
       const room = rooms[roomName];
 
+      console.log("Next question");
       if (!room) {
         socket.emit("room:error", "Room not found");
+        console.log("Room not found");
         return;
       }
 
@@ -183,6 +190,7 @@ export const setupGameHandlers = (
           "room:error",
           "Cannot advance to next question in current state"
         );
+        console.log("Cannot advance to next question in current state");
         return;
       }
 
@@ -201,64 +209,75 @@ export const setupGameHandlers = (
         return;
       }
 
-      if (room.questions.length > 0) {
-        const nextQuestion = room.questions.shift();
+      console.log("Next question", room.questions);
+      const pack: PackRow =
+        allQuestions[Math.floor(Math.random() * allQuestions.length)];
 
-        if (nextQuestion) {
-          room.currentQuestion = nextQuestion;
-          room.currentBuzzed = undefined;
-          room.currentAnswered = false;
-          room.state = "reading";
-          room.teamsAttempted = [];
+      let section: SectionRow =
+        pack.sections[Math.floor(Math.random() * pack.sections.length)];
+      while (section.title === "Jackpot" || section.title === "Streak") {
+        section =
+          pack.sections[Math.floor(Math.random() * pack.sections.length)];
+      }
 
-          pauseManager.initRoom(roomName);
+      const nextQuestion: QuestionRow =
+        section.questions[Math.floor(Math.random() * section.questions.length)];
 
-          const words = nextQuestion.q.split(" ");
-          words.forEach((word) => {
-            let wordDelay = Math.log(word.length) + 1;
+      if (nextQuestion) {
+        console.log("Next question found");
+        room.currentQuestion = {
+          q: "",
+          a: nextQuestion.answers.map((answer: any) => answer),
+        };
+        room.currentBuzzed = undefined;
+        room.currentAnswered = false;
+        room.state = "reading";
+        room.teamsAttempted = [];
 
-            if (
-              word.endsWith(".") ||
-              word.endsWith(",") ||
-              word.endsWith("!") ||
-              word.endsWith("?")
-            ) {
-              wordDelay += 1;
-            }
+        pauseManager.initRoom(roomName);
 
-            wordDelay = wordDelay * room.config.readingSpeed;
-            pauseManager.wordQueue[roomName].push({
-              word,
-              delay: wordDelay,
-            });
+        const words = nextQuestion.question.split(" ");
+        words.forEach((word) => {
+          let wordDelay = Math.log(word.length) + 1;
+
+          if (
+            word.endsWith(".") ||
+            word.endsWith(",") ||
+            word.endsWith("!") ||
+            word.endsWith("?")
+          ) {
+            wordDelay += 1;
+          }
+
+          wordDelay = wordDelay * room.config.readingSpeed;
+          pauseManager.wordQueue[roomName].push({
+            word,
+            delay: wordDelay,
           });
+        });
 
-          pauseManager.nextWord(roomName, room, io);
+        pauseManager.nextWord(roomName, room, io);
 
-          let teamColour: string = "";
-          Object.keys(room.teams).map((t) => {
-            const f = room.teams[t].members.filter(
-              (member) => member.userName === userName
-            );
+        let teamColour: string = "";
+        Object.keys(room.teams).map((t) => {
+          const f = room.teams[t].members.filter(
+            (member) => member.userName === userName
+          );
 
-            if (f.length !== 0) {
-              teamColour = room.teams[t].colour;
-            }
-          });
+          if (f.length !== 0) {
+            teamColour = room.teams[t].colour;
+          }
+        });
 
-          rooms[roomName].system.unshift({
-            author: "admin",
-            text: `<span><span class="font-semibold" style="background-color: ${getColorWithOpacity(
-              teamColour
-            )}">${userName}</span> began the next question</span>`,
-            timestamp: Date.now(),
-            tsx: true,
-          });
+        rooms[roomName].system.unshift({
+          author: "admin",
+          text: `<span><span class="font-semibold" style="background-color: ${getColorWithOpacity(
+            teamColour
+          )}">${userName}</span> began the next question</span>`,
+          timestamp: Date.now(),
+          tsx: true,
+        });
 
-          io.to(roomName).emit("room:update", room);
-        }
-      } else {
-        room.state = "gameOver";
         io.to(roomName).emit("room:update", room);
       }
     }
