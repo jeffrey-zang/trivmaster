@@ -17,6 +17,9 @@ const pauseManager = {
   lastProcessedIndex: {} as Record<string, number>,
 
   initRoom(roomName: string) {
+    if (this.timer[roomName]) {
+      clearTimeout(this.timer[roomName]);
+    }
     this.timer[roomName] = null;
     this.wordQueue[roomName] = [];
     this.isPaused[roomName] = false;
@@ -24,12 +27,21 @@ const pauseManager = {
   },
 
   nextWord(roomName: string, room: Room, io: Server) {
+    if (!this.wordQueue[roomName] || this.isPaused[roomName]) {
+      return;
+    }
+
     if (
       this.lastProcessedIndex[roomName] + 1 ==
       this.wordQueue[roomName].length
     ) {
       room.lastEventTimestamp = Date.now();
       io.to(roomName).emit("room:update", room);
+
+      if (this.timer[roomName]) {
+        clearTimeout(this.timer[roomName]);
+      }
+
       this.timer[roomName] = setTimeout(() => {
         room.state = "showAnswer";
         room.system.unshift({
@@ -44,8 +56,6 @@ const pauseManager = {
       }, room.config.buzzTime);
       return;
     }
-
-    if (!this.wordQueue[roomName] || this.isPaused[roomName]) return;
 
     const remainingWords = this.wordQueue[roomName].slice(
       this.lastProcessedIndex[roomName] + 1
@@ -235,6 +245,7 @@ export const setupGameHandlers = (
         room.teamsAttempted = [];
 
         pauseManager.initRoom(roomName);
+        pauseManager.isPaused[roomName] = false;
 
         const words = nextQuestion.question.split(" ");
         words.forEach((word) => {
@@ -607,7 +618,9 @@ export const setupGameHandlers = (
           teamColour
         )}">${socket.userName}</span>  answered: "${answer}" - ${
           isCorrect ? "Correct!" : "Incorrect!"
-        }</span>`,
+        }</span>. The possible answers were: <span class="font-semibold">${room.currentQuestion?.a
+          .map((a) => a.text)
+          .join(" OR ")}</span>`,
         timestamp: Date.now(),
         tsx: true,
       });
@@ -629,6 +642,9 @@ export const setupGameHandlers = (
 
         room.currentAnswered = true;
         room.state = "waiting";
+        pauseManager.isPaused[roomName] = true;
+        pauseManager.wordQueue[roomName] = [];
+        pauseManager.lastProcessedIndex[roomName] = -1;
       } else {
         const teamNames = Object.keys(room.teams).filter(
           (name) => name !== "Lobby"
