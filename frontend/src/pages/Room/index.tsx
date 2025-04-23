@@ -65,6 +65,13 @@ const Room = () => {
   }, []);
 
   useEffect(() => {
+    socket.on("member:rename", (memberFromServer: ISocket) => {
+      console.log("Member renamed:", memberFromServer);
+      setMember(memberFromServer);
+    });
+  }, []);
+
+  useEffect(() => {
     const handleBeforeUnload = () => {
       if (roomName) {
         socket.emit("room:leave", { roomName });

@@ -44,6 +44,8 @@ export const setupTeamHandlers = (
         return;
       }
 
+      console.log(rooms[roomName].teams, roomName, teamName, userName);
+
       Object.values(rooms[roomName].teams).forEach((team: Team) => {
         team.members = team.members.filter(
           (member: Member) => member.userName !== userName
@@ -85,10 +87,7 @@ export const setupTeamHandlers = (
       console.log(userName, "added a team:", teamName);
       console.log(userName, "joined team:", teamName);
 
-      io.to(roomName).emit("room:update", rooms[roomName], {
-        userName: userName,
-        teamName: teamName,
-      });
+      io.to(roomName).emit("room:update", rooms[roomName]);
     }
   );
 
@@ -135,10 +134,7 @@ export const setupTeamHandlers = (
       });
       console.log(userName, "joined team:", teamName);
 
-      io.to(roomName).emit("room:update", rooms[roomName], {
-        userName: userName,
-        teamName: teamName,
-      });
+      io.to(roomName).emit("room:update", rooms[roomName]);
     }
   );
 };

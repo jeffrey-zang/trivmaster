@@ -68,10 +68,12 @@ export const setupMemberHandlers = (
         tsx: true,
       });
 
-      io.to(roomName).emit("room:update", room, {
+      socket.emit("member:rename", {
         userName: newUserName,
         teamName: socket.teamName,
       });
+
+      io.to(roomName).emit("room:update", room);
     }
   );
 };

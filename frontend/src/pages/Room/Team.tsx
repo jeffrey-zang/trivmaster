@@ -163,6 +163,7 @@ const TeamComponent = ({
             backgroundColor: getColorWithOpacity(team.colour),
           }}
           onClick={() => {
+            console.log(team.teamName, currentTeam);
             if (team.teamName === currentTeam) {
               return;
             }
@@ -194,17 +195,29 @@ const TeamComponent = ({
                     <Tooltip>
                       <TooltipTrigger>
                         <button
-                          onClick={() => {
-                            setRenaming(true);
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (member.userName === userName) {
+                              setRenaming(true);
+                            }
                           }}
-                          className={`${renaming ? "hidden" : "block"}`}
+                          className={`${
+                            renaming && member.userName === userName
+                              ? "hidden"
+                              : "block"
+                          }`}
                         >
                           {member.userName}
                         </button>
                         <form
-                          className={`${renaming ? "block" : "hidden"} w-min`}
+                          className={`${
+                            renaming && member.userName === userName
+                              ? "block"
+                              : "hidden"
+                          } w-min`}
                           onSubmit={(e) => {
                             e.preventDefault();
+                            e.stopPropagation();
                             if (rename === "") {
                               toast.error("Name cannot be empty");
                               return;
@@ -229,9 +242,9 @@ const TeamComponent = ({
                           ></input>
                         </form>
                       </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Rename</p>
-                      </TooltipContent>
+                      {member.userName === userName && (
+                        <TooltipContent>Rename</TooltipContent>
+                      )}
                     </Tooltip>
                   </TooltipProvider>
 
