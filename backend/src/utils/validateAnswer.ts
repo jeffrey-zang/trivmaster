@@ -47,6 +47,13 @@ function areSimilar(str1: string, str2: string, maxDistance?: number): boolean {
 
   if (normalizedStr1 === normalizedStr2) return true;
 
+  const isNum1 = !isNaN(Number(normalizedStr1));
+  const isNum2 = !isNaN(Number(normalizedStr2));
+
+  if (isNum1 && isNum2) {
+    return Number(normalizedStr1) === Number(normalizedStr2);
+  }
+
   const distance = damerauLevenshteinDistance(normalizedStr1, normalizedStr2);
 
   if (maxDistance === undefined) {
